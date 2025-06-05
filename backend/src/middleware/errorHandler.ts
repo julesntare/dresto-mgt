@@ -1,51 +1,52 @@
-import { Request, Response, NextFunction } from "express";
+import { ErrorRequestHandler } from "express";
 
-export const errorHandler = (
-  error: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.error("Error:", error);
+export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  console.error("Error:", err);
 
   // Prisma errors
-  if (error.code === "P2002") {
-    return res.status(409).json({
+  if (err.code === "P2002") {
+    res.status(409).json({
       message: "Duplicate entry",
-      field: error.meta?.target?.[0] || "unknown",
+      field: err.meta?.target?.[0] || "unknown",
     });
+    return;
   }
 
-  if (error.code === "P2025") {
-    return res.status(404).json({
+  if (err.code === "P2025") {
+    res.status(404).json({
       message: "Record not found",
     });
+    return;
   }
 
   // Validation errors
-  if (error.name === "ValidationError") {
-    return res.status(400).json({
+  if (err.name === "ValidationError") {
+    res.status(400).json({
       message: "Validation error",
-      errors: error.errors,
+      errors: err.errors,
     });
+    return;
   }
 
   // JWT errors
-  if (error.name === "JsonWebTokenError") {
-    return res.status(401).json({
+  if (err.name === "JsonWebTokenError") {
+    res.status(401).json({
       message: "Invalid token",
     });
+    return;
   }
 
-  if (error.name === "TokenExpiredError") {
-    return res.status(401).json({
+  if (err.name === "TokenExpiredError") {
+    res.status(401).json({
       message: "Token expired",
     });
+    return;
   }
 
   // Default error
-  res.status(error.status || 500).json({
-    message: error.message || "Internal server error",
-    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
+  res.status(err.status || 500).json({
+    message: err.message || "Internal server error",
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
+  return;
 };

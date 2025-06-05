@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 
@@ -25,13 +25,14 @@ export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ message: "Access token required" });
+      res.status(401).json({ message: "Access token required" });
+      return;
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
@@ -42,20 +43,20 @@ export const authenticateToken = async (
     });
 
     if (!user || !user.isActive) {
-      return res
-        .status(401)
-        .json({ message: "Invalid token or user inactive" });
+      res.status(401).json({ message: "Invalid token or user inactive" });
+      return;
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Invalid token" });
+    res.status(403).json({ message: "Invalid token" });
+    return;
   }
 };
 
-export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requireRole = (roles: string[]): RequestHandler => {
+  return (async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -65,5 +66,5 @@ export const requireRole = (roles: string[]) => {
     }
 
     next();
-  };
+  }) as RequestHandler;
 };
