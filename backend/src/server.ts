@@ -4,7 +4,6 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
-import "express-async-errors";
 
 // Load environment variables
 dotenv.config();
@@ -14,8 +13,8 @@ import authRoutes from "./routes/auth";
 import menuRoutes from "./routes/menu";
 import orderRoutes from "./routes/orders";
 import categoryRoutes from "./routes/categories";
-import { errorHandler } from "./middleware/errorHandler";
 import { prisma } from "./lib/prisma";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -49,14 +48,14 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/menu", menuRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+// 404 handler
+app.use(/(.*)/, (req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
 
 // Error handling
 app.use(errorHandler);
 
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
