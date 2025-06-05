@@ -26,7 +26,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "path-to-regexp": "^8.2.0",
     "prisma": "^6.9.0"
   },
   "devDependencies": {
