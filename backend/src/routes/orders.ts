@@ -788,16 +788,15 @@ router.get(
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysCount);
       startDate.setHours(0, 0, 0, 0);
-
       const dailySales = await prisma.$queryRaw`
-      SELECT 
-        DATE(created_at) as date,
+      SELECT
+        DATE("createdAt") as date,
         COUNT(*) as order_count,
-        SUM(total_amount) as total_revenue
-      FROM orders 
-      WHERE created_at >= ${startDate} 
+        SUM("totalAmount") as total_revenue
+      FROM "Order"
+      WHERE "createdAt" >= ${startDate}
         AND status = 'DELIVERED'
-      GROUP BY DATE(created_at)
+      GROUP BY DATE("createdAt")
       ORDER BY date DESC
     `;
 
