@@ -765,8 +765,8 @@ router.get(
             totalOrders > 0
               ? ((completedOrders / totalOrders) * 100).toFixed(2)
               : 0,
+          popularItems: popularItemsWithDetails,
         },
-        popularItems: popularItemsWithDetails,
       });
     } catch (error) {
       console.error("Order stats error:", error);
@@ -793,7 +793,7 @@ router.get(
         DATE("createdAt") as date,
         COUNT(*) as order_count,
         SUM("totalAmount") as total_revenue
-      FROM "Order"
+      FROM "orders"
       WHERE "createdAt" >= ${startDate}
         AND status = 'DELIVERED'
       GROUP BY DATE("createdAt")
