@@ -27,7 +27,12 @@ const navigation = [
     roles: ["ADMIN", "MANAGER"],
   },
   { name: "Users", href: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["ADMIN"] },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+    roles: ["ADMIN"],
+  },
 ];
 
 export default function Sidebar() {
@@ -37,7 +42,7 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const filteredNavigation = navigation.filter(
-    (item) => !item.roles || item.roles.includes(user?.role || "")
+    (item) => !item.roles || item.roles.includes(user?.role || ""),
   );
 
   return (
@@ -72,7 +77,7 @@ export default function Sidebar() {
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
+                <Icon className="h-5 w-5 shrink-0" />
                 {!collapsed && <span className="ml-3">{item.name}</span>}
               </Link>
             );
@@ -87,20 +92,22 @@ export default function Sidebar() {
             <p>{user?.role}</p>
           </div>
         )}
-        
+
         <button
           onClick={toggleTheme}
           className="flex items-center w-full px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
-          title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          title={
+            theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+          }
         >
-          {theme === 'light' ? (
+          {theme === "light" ? (
             <>
-              <Moon className="h-5 w-5 flex-shrink-0" />
+              <Moon className="h-5 w-5 shrink-0" />
               {!collapsed && <span className="ml-3">Dark Mode</span>}
             </>
           ) : (
             <>
-              <Sun className="h-5 w-5 flex-shrink-0" />
+              <Sun className="h-5 w-5 shrink-0" />
               {!collapsed && <span className="ml-3">Light Mode</span>}
             </>
           )}
@@ -110,7 +117,7 @@ export default function Sidebar() {
           onClick={logout}
           className="flex items-center w-full px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
         >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
+          <LogOut className="h-5 w-5 shrink-0" />
           {!collapsed && <span className="ml-3">Sign out</span>}
         </button>
       </div>
