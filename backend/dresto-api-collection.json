@@ -1,0 +1,628 @@
+{
+  "info": {
+    "name": "D'Resto Management API",
+    "description": "REST API collection for JJ D'Resto restaurant management system. Base URL: http://localhost:5000/api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@dresto.com\",\n  \"password\": \"password123\",\n  \"name\": \"Admin User\",\n  \"role\": \"ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@dresto.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"],
+              "query": [
+                { "key": "includeInactive", "value": "false", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Course\",\n  \"description\": \"Primary dishes\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Course Updated\",\n  \"description\": \"Updated description\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": ["{{baseUrl}}"],
+              "path": ["menu"],
+              "query": [
+                { "key": "categoryId", "value": "", "disabled": true },
+                { "key": "available", "value": "true", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Menu Item by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/menu", "host": ["{{baseUrl}}"], "path": ["menu"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nasi Goreng\",\n  \"description\": \"Indonesian fried rice\",\n  \"price\": 35000,\n  \"categoryId\": \"CATEGORY_ID_HERE\",\n  \"image\": \"https://example.com/nasi-goreng.jpg\",\n  \"isAvailable\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nasi Goreng Special\",\n  \"description\": \"Special Indonesian fried rice\",\n  \"price\": 40000,\n  \"categoryId\": \"CATEGORY_ID_HERE\",\n  \"isAvailable\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Menu Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Bulk Update Availability",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/menu/bulk-availability", "host": ["{{baseUrl}}"], "path": ["menu", "bulk-availability"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemIds\": [\"MENU_ITEM_ID_1\", \"MENU_ITEM_ID_2\"],\n  \"isAvailable\": false\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"],
+              "query": [
+                { "key": "status", "value": "PENDING", "disabled": true, "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED" },
+                { "key": "orderType", "value": "DINE_IN", "disabled": true, "description": "DINE_IN | TAKEAWAY | DELIVERY" },
+                { "key": "startDate", "value": "2026-01-01", "disabled": true },
+                { "key": "endDate", "value": "2026-12-31", "disabled": true },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "limit", "value": "10", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Order Details",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"Extra sauce\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/status", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "status"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Valid statuses: PENDING, CONFIRMED, PREPARING, READY, DELIVERED, CANCELLED"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/cancel", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "cancel"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer changed their mind\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "description": "Admin only"
+          }
+        },
+        {
+          "name": "Stats - Overview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/stats/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "stats", "overview"],
+              "query": [
+                { "key": "startDate", "value": "2026-01-01", "disabled": true },
+                { "key": "endDate", "value": "2026-12-31", "disabled": true }
+              ]
+            },
+            "description": "Admin/Manager only"
+          }
+        },
+        {
+          "name": "Stats - Daily Sales",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/stats/daily-sales?days=7",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "stats", "daily-sales"],
+              "query": [
+                { "key": "days", "value": "7", "description": "Number of days (default: 7)" }
+              ]
+            },
+            "description": "Admin/Manager only"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "Get All Tables (public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tables",
+              "host": ["{{baseUrl}}"],
+              "path": ["tables"],
+              "query": [
+                { "key": "isActive", "value": "true", "disabled": true, "description": "Defaults to true — omit to get all active tables" }
+              ]
+            },
+            "description": "Public endpoint. Returns active tables by default."
+          }
+        },
+        {
+          "name": "Create Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/tables", "host": ["{{baseUrl}}"], "path": ["tables"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"number\": \"T1\",\n  \"capacity\": 4,\n  \"location\": \"Main Hall\"\n}"
+            },
+            "description": "Admin only"
+          }
+        },
+        {
+          "name": "Update Table",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/tables/:id", "host": ["{{baseUrl}}"], "path": ["tables", ":id"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"number\": \"T1\",\n  \"capacity\": 6,\n  \"location\": \"VIP Room\",\n  \"isActive\": true\n}"
+            },
+            "description": "Admin only"
+          }
+        },
+        {
+          "name": "Update Table Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/tables/:id/status", "host": ["{{baseUrl}}"], "path": ["tables", ":id", "status"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\"\n}"
+            },
+            "description": "Admin/Manager only. status: AVAILABLE | OCCUPIED | RESERVED"
+          }
+        },
+        {
+          "name": "Delete Table",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/tables/:id", "host": ["{{baseUrl}}"], "path": ["tables", ":id"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "description": "Admin only. Fails if table has active orders."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Guest Ordering",
+      "description": "No authentication required. Flow: browse menu → pick table → place order.",
+      "item": [
+        {
+          "name": "1. Browse Menu",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu?available=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["menu"],
+              "query": [
+                { "key": "available", "value": "true" },
+                { "key": "categoryId", "value": "", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            },
+            "description": "Public. Filter by available=true to show only orderable items."
+          }
+        },
+        {
+          "name": "2. Browse Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Public."
+          }
+        },
+        {
+          "name": "3. Get Available Tables",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/tables",
+              "host": ["{{baseUrl}}"],
+              "path": ["tables"]
+            },
+            "description": "Public. Returns active tables. Guest picks a table for DINE_IN orders."
+          }
+        },
+        {
+          "name": "4. Place Order (Guest)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+            },
+            "description": "No Authorization header needed. userId will be null. orderType: DINE_IN | TAKEAWAY | DELIVERY. tableId only required for DINE_IN."
+          }
+        },
+        {
+          "name": "4. Place Order (Guest - Takeaway)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"TAKEAWAY\",\n  \"notes\": \"Ready in 15 minutes\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 1 }\n  ]\n}"
+            },
+            "description": "No Authorization header needed. No tableId for TAKEAWAY."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "All endpoints require ADMIN role",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Staff Member\",\n  \"email\": \"staff@dresto.com\",\n  \"phone\": \"08123456789\",\n  \"password\": \"password123\",\n  \"role\": \"STAFF\"\n}"
+            },
+            "description": "email + password optional. If email is provided, password is required. role: ADMIN | MANAGER | STAFF"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"08199999999\",\n  \"role\": \"MANAGER\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] }
+          }
+        }
+      ]
+    }
+  ]
+}

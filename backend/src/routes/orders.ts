@@ -1,7 +1,7 @@
 // src/routes/orders.ts
 import express, { RequestHandler } from "express";
 import { prisma } from "../lib/prisma";
-import { authenticateToken, requireRole } from "../middleware/auth";
+import { authenticateToken, optionalAuthenticateToken, requireRole } from "../middleware/auth";
 import { orderValidation, handleValidationErrors } from "../utils/validation";
 import { generateOrderNumber, calculateOrderTotal } from "../utils/helpers";
 
@@ -476,10 +476,10 @@ router.get("/:id", authenticateToken, (async (req, res) => {
   }
 }) as RequestHandler);
 
-// Create new order
+// Create new order (guests allowed — userId will be null for unauthenticated requests)
 router.post(
   "/",
-  authenticateToken,
+  optionalAuthenticateToken,
   orderValidation,
   handleValidationErrors,
   (async (req, res) => {
@@ -492,7 +492,7 @@ router.post(
         notes,
         items,
       } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user?.id || null;
 
       // Validate table for DINE_IN orders
       if (orderType === "DINE_IN" && tableId) {

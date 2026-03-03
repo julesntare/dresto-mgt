@@ -55,6 +55,34 @@ export const authenticateToken = async (
   }
 };
 
+export const optionalAuthenticateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, email: true, role: true, name: true, isActive: true },
+    });
+
+    if (user && user.isActive) {
+      req.user = user;
+    }
+    next();
+  } catch {
+    next(); // invalid/expired token — proceed as guest
+  }
+};
+
 export const requireRole = (roles: string[]): RequestHandler => {
   return (async (req, res, next) => {
     if (!req.user) {

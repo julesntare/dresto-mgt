@@ -197,14 +197,16 @@ import { authenticateToken, requireRole } from "../middleware/auth";
 
 const router = express.Router();
 
-// Get all tables (all authenticated staff)
-router.get("/", authenticateToken, async (req, res) => {
+// Get all tables (public — guests see only active tables; staff can filter by isActive)
+router.get("/", async (req, res) => {
   try {
     const { isActive } = req.query;
 
     const where: any = {};
     if (isActive !== undefined) {
       where.isActive = isActive === "true";
+    } else {
+      where.isActive = true; // default: only active tables for guests
     }
 
     const tables = await prisma.table.findMany({
