@@ -33,7 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem("accessToken");
-      if (token) {        try {
+      if (token) {
+        try {
           const { user } = await authApi.getProfile();
           setUser(user);
         } catch {
@@ -45,9 +46,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initAuth();
+
+    // Listen for token removal from the Axios interceptor (session expiry)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "accessToken" && !e.newValue) {
+        setUser(null);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const login = async (email: string, password: string) => {    try {
+  const login = async (email: string, password: string) => {
+    try {
       const response = await authApi.login(email, password);
       const { user, accessToken, refreshToken } = response;
 
@@ -55,13 +66,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("refreshToken", refreshToken);
       setUser(user as User);
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
+      // Check Axios errors first — AxiosError also extends Error so order matters
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || "Login failed");
+        const status = error.response?.status;
+        const serverMsg = error.response?.data?.message;
+        if (status === 401) throw new Error("Incorrect email or password.");
+        if (status === 403) throw new Error("Your account is inactive. Contact an administrator.");
+        if (status === 429) throw new Error("Too many attempts. Please wait and try again.");
+        if (!error.response) throw new Error("Cannot reach the server. Check your connection.");
+        throw new Error(serverMsg || "Login failed. Please try again.");
       }
-      throw new Error("Login failed");
+      throw new Error("An unexpected error occurred. Please try again.");
     }
   };
 

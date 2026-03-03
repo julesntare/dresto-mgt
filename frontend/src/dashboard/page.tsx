@@ -2,21 +2,11 @@ import { useEffect, useState, useMemo, type ReactNode } from "react";
 import { useAuth } from "../lib/auth-context";
 import { ordersApi } from "../lib/api";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend,
 } from "recharts";
 import {
-  Clock,
-  DollarSign,
-  Package,
-  ShoppingBag,
-  ArrowUp,
-  ArrowDown,
+  ShoppingBag, Clock, CheckCircle, XCircle, DollarSign, TrendingUp,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -27,9 +17,11 @@ interface OrderStats {
   pendingOrders: number;
   totalRevenue: number;
   completionRate: number;
+  averageOrderValue?: number;
+  ordersByType?: Array<{ type: string; count: number; revenue: number }>;
   popularItems: Array<{
     menuItemId: string;
-    _sum: { quantity: number };
+    _sum: { quantity: number; price?: number };
     menuItem: { name: string; price: number };
   }>;
 }
@@ -40,23 +32,36 @@ interface DailySales {
   total_revenue: number;
 }
 
+function formatCurrency(amount: number): string {
+  return `RWF ${Math.round(amount).toLocaleString("en-US")}`;
+}
+
+const ORDER_TYPE_COLORS: Record<string, string> = {
+  DINE_IN: "#6366f1",
+  TAKEAWAY: "#22c55e",
+  DELIVERY: "#f59e0b",
+};
+
+const ORDER_TYPE_LABELS: Record<string, string> = {
+  DINE_IN: "Dine In",
+  TAKEAWAY: "Takeaway",
+  DELIVERY: "Delivery",
+};
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<OrderStats | null>(null);
   const [dailySales, setDailySales] = useState<DailySales[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Memoize formatted dates to prevent hydration mismatch
-  const formattedDailySales = useMemo(() => {
-    return dailySales.map((sale) => ({
-      ...sale,
-      formattedDate: format(new Date(sale.date), "MMM dd"),
-      fullDate: format(new Date(sale.date), "MMMM dd, yyyy"),
-    }));
-  }, [dailySales]);
+  const formattedDailySales = useMemo(() =>
+    dailySales.map((s) => ({
+      ...s,
+      label: format(new Date(s.date), "MMM dd"),
+    })), [dailySales]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchData = async () => {
       try {
         const [statsData, salesData] = await Promise.all([
           ordersApi.getStats(),
@@ -64,185 +69,344 @@ export default function Dashboard() {
         ]);
         setStats(statsData.stats);
         setDailySales(salesData.dailySales);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchDashboardData();
+    fetchData();
   }, []);
+
+  const isManager = user?.role === "ADMIN" || user?.role === "MANAGER";
+
+  const activeOrders = stats
+    ? stats.totalOrders - stats.completedOrders - stats.cancelledOrders
+    : 0;
+
+  const cancellationRate =
+    stats && stats.totalOrders > 0
+      ? ((stats.cancelledOrders / stats.totalOrders) * 100).toFixed(1)
+      : "0.0";
+
+  const orderTypeData = (stats?.ordersByType || []).map((t) => ({
+    name: ORDER_TYPE_LABELS[t.type] || t.type,
+    value: t.count,
+    revenue: t.revenue,
+    color: ORDER_TYPE_COLORS[t.type] || "#6b7280",
+  }));
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900" />
       </div>
     );
   }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}</h1>
-        <p className="text-gray-600">
-          Here&apos;s what&apos;s happening with your restaurant today.
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Welcome back, {user?.name}
+        </h1>
+        <p className="text-gray-500 mt-1 text-sm">
+          Here's what's happening with your restaurant today.
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Total Orders"
-          value={stats?.totalOrders || 0}
-          icon={<Package className="h-6 w-6" />}
-          trend={10}
+      {/* KPI Cards */}
+      <div className={`grid gap-4 mb-6 ${isManager ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"}`}>
+        <KpiCard
+          label="Total Orders"
+          value={String(stats?.totalOrders ?? 0)}
+          icon={<ShoppingBag className="h-5 w-5 text-indigo-600" />}
+          bg="bg-indigo-50"
         />
-        <StatCard
-          title="Pending Orders"
-          value={stats?.pendingOrders || 0}
-          icon={<Clock className="h-6 w-6" />}
-          trend={-5}
-          trendColor="yellow"
+        <KpiCard
+          label="Active"
+          value={String(Math.max(0, activeOrders))}
+          icon={<Clock className="h-5 w-5 text-amber-600" />}
+          bg="bg-amber-50"
+          sub="In progress"
         />
-        <StatCard
-          title="Completed Orders"
-          value={stats?.completedOrders || 0}
-          icon={<ShoppingBag className="h-6 w-6" />}
-          trend={15}
+        <KpiCard
+          label="Completed"
+          value={String(stats?.completedOrders ?? 0)}
+          icon={<CheckCircle className="h-5 w-5 text-green-600" />}
+          bg="bg-green-50"
         />
-        <StatCard
-          title="Total Revenue"
-          value={formatCurrency(stats?.totalRevenue || 0)}
-          icon={<DollarSign className="h-6 w-6" />}
-          trend={8}
+        <KpiCard
+          label="Cancelled"
+          value={String(stats?.cancelledOrders ?? 0)}
+          icon={<XCircle className="h-5 w-5 text-red-500" />}
+          bg="bg-red-50"
         />
+        {isManager && (
+          <KpiCard
+            label="Total Revenue"
+            value={formatCurrency(stats?.totalRevenue ?? 0)}
+            icon={<DollarSign className="h-5 w-5 text-blue-600" />}
+            bg="bg-blue-50"
+          />
+        )}
+        {isManager && (
+          <KpiCard
+            label="Avg Order"
+            value={formatCurrency(stats?.averageOrderValue ?? 0)}
+            icon={<TrendingUp className="h-5 w-5 text-purple-600" />}
+            bg="bg-purple-50"
+            sub="Per completed"
+          />
+        )}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Revenue (Last 7 Days)</h2>
-          <div className="h-75">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={formattedDailySales}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="formattedDate" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
-                  labelFormatter={(label: string) =>
-                    formattedDailySales.find(
-                      (sale) => sale.formattedDate === label
-                    )?.fullDate || label
-                  }
-                />
-                <Bar dataKey="total_revenue" fill="#6366f1" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Popular Items</h2>
-          <div className="space-y-4">
-            {stats?.popularItems?.slice(0, 5).map((item) => (
-              <div
-                key={item.menuItemId}
-                className="flex items-center justify-between"
-              >
-                <div>
-                  <p className="font-medium">{item.menuItem.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {item._sum.quantity} orders
-                  </p>
-                </div>
-                <span className="font-medium">
-                  {formatCurrency(item.menuItem.price * item._sum.quantity)}
-                </span>
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Revenue Chart - spans 2 cols for managers */}
+        {isManager ? (
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
+              Revenue — Last 7 Days
+            </h2>
+            {formattedDailySales.length === 0 ? (
+              <EmptyState label="No revenue data" />
+            ) : (
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      tickFormatter={(v) => `${Math.round(v / 1000)}k`}
+                    />
+                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Revenue"]} />
+                    <Bar dataKey="total_revenue" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      </div>
-
-      {/* Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Order Completion Rate</h2>
-          <div className="flex items-end space-x-2">
-            <span className="text-3xl font-bold">{stats?.completionRate}%</span>
-            <span className="text-green-500 flex items-center">
-              <ArrowUp className="h-4 w-4" />
-              2.1%
-            </span>
+        ) : (
+          /* Order Volume for staff (no revenue) */
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
+              Order Volume — Last 7 Days
+            </h2>
+            {formattedDailySales.length === 0 ? (
+              <EmptyState label="No order data" />
+            ) : (
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <Tooltip formatter={(v: number) => [v, "Orders"]} />
+                    <Bar dataKey="order_count" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
-          <p className="text-gray-500 mt-1">Compared to last week</p>
-        </div>
+        )}
 
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">Cancellation Rate</h2>
-          <div className="flex items-end space-x-2">
-            <span className="text-3xl font-bold">
-              {stats && stats.totalOrders > 0
-                ? ((stats.cancelledOrders / stats.totalOrders) * 100).toFixed(1)
-                : 0}
-              %
-            </span>
-            <span className="text-red-500 flex items-center">
-              <ArrowDown className="h-4 w-4" />
-              0.8%
-            </span>
-          </div>
-          <p className="text-gray-500 mt-1">Compared to last week</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-  icon,
-  trend,
-  trendColor = trend > 0 ? "green" : "red",
-}: {
-  title: string;
-  value: string | number;
-  icon: ReactNode;
-  trend: number;
-  trendColor?: "green" | "red" | "yellow";
-}) {
-  const trendColorClasses = {
-    green: "text-green-500",
-    red: "text-red-500",
-    yellow: "text-yellow-500",
-  };
-
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-2 bg-indigo-50 rounded-lg">{icon}</div>
-        <span className={`flex items-center ${trendColorClasses[trendColor]}`}>
-          {trend > 0 ? (
-            <ArrowUp className="h-4 w-4" />
+        {/* Order Type Donut */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Order Types</h2>
+          {orderTypeData.length === 0 ? (
+            <EmptyState label="No data" />
           ) : (
-            <ArrowDown className="h-4 w-4" />
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={orderTypeData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={48}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {orderTypeData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Legend
+                    formatter={(v) => <span className="text-xs text-gray-600">{v}</span>}
+                  />
+                  <Tooltip
+                    formatter={(v: number, _name, props) => [
+                      isManager
+                        ? `${v} orders · ${formatCurrency(props.payload.revenue)}`
+                        : `${v} orders`,
+                      props.payload.name,
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
-          {Math.abs(trend)}%
-        </span>
+        </div>
       </div>
-      <h3 className="text-gray-500 text-sm font-medium">{title}</h3>
-      <p className="text-2xl font-semibold mt-1">{value}</p>
+
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Order Volume (for managers — alongside revenue chart above) */}
+        {isManager && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">
+              Order Volume — Last 7 Days
+            </h2>
+            {formattedDailySales.length === 0 ? (
+              <EmptyState label="No order data" />
+            ) : (
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <Tooltip formatter={(v: number) => [v, "Orders"]} />
+                    <Bar dataKey="order_count" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Top Items */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Top Items</h2>
+          {!stats?.popularItems?.length ? (
+            <EmptyState label="No items data" />
+          ) : (
+            <div className="space-y-3">
+              {stats.popularItems.slice(0, 5).map((item, i) => {
+                const maxQty = stats.popularItems[0]._sum.quantity;
+                const pct = Math.round((item._sum.quantity / maxQty) * 100);
+                const revenue = item._sum.price
+                  ? item._sum.price
+                  : item.menuItem.price * item._sum.quantity;
+                return (
+                  <div key={item.menuItemId}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-400 w-4">
+                          #{i + 1}
+                        </span>
+                        <span className="font-medium text-gray-800">
+                          {item.menuItem.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-right">
+                        <span className="text-gray-500">{item._sum.quantity} sold</span>
+                        {isManager && (
+                          <span className="text-xs text-gray-400">
+                            {formatCurrency(revenue)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-indigo-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Performance Summary */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-900 mb-4">
+          Performance Summary
+        </h2>
+        <div className={`grid gap-6 ${isManager ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2"}`}>
+          <MetricRow
+            label="Completion Rate"
+            value={`${stats?.completionRate ?? 0}%`}
+            good={Number(stats?.completionRate ?? 0) >= 70}
+          />
+          <MetricRow
+            label="Cancellation Rate"
+            value={`${cancellationRate}%`}
+            good={Number(cancellationRate) <= 10}
+            invertGood
+          />
+          {isManager && (
+            <MetricRow
+              label="Avg Order Value"
+              value={formatCurrency(stats?.averageOrderValue ?? 0)}
+              good
+            />
+          )}
+          {isManager && (
+            <MetricRow
+              label="Active Orders"
+              value={String(Math.max(0, activeOrders))}
+              good={activeOrders > 0}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+function KpiCard({
+  label, value, icon, bg, sub,
+}: {
+  label: string;
+  value: string;
+  icon: ReactNode;
+  bg: string;
+  sub?: string;
+}) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`p-1.5 rounded-lg ${bg}`}>{icon}</div>
+      </div>
+      <p className="text-xl font-bold text-gray-900 leading-tight">{value}</p>
+      <p className="text-sm text-gray-500 mt-0.5">{label}</p>
+      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+function MetricRow({
+  label, value, good, invertGood = false,
+}: {
+  label: string;
+  value: string;
+  good: boolean;
+  invertGood?: boolean;
+}) {
+  const isGood = invertGood ? !good : good;
+  return (
+    <div>
+      <p className="text-sm text-gray-500 mb-1">{label}</p>
+      <p className={`text-xl font-bold ${isGood ? "text-green-600" : "text-red-500"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-center h-40 text-gray-400">
+      <p className="text-sm">{label}</p>
+    </div>
+  );
 }

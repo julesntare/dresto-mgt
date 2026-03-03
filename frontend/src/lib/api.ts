@@ -41,7 +41,8 @@ interface Order {
   customerName?: string;
   customerPhone?: string;
   orderType: "DINE_IN" | "TAKEAWAY" | "DELIVERY";
-  tableNumber?: string;
+  tableId?: string;
+  table?: { id: string; number: string; location?: string };
   notes?: string;
   totalAmount: number;
   status:
@@ -66,7 +67,7 @@ interface CreateOrderData {
   customerName?: string;
   customerPhone?: string;
   orderType: "DINE_IN" | "TAKEAWAY" | "DELIVERY";
-  tableNumber?: string;
+  tableId?: string;
   notes?: string;
   items: { menuItemId: string; quantity: number }[];
 }
@@ -110,32 +111,50 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh
+function redirectToLogin() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  // Only redirect if not already on the login page
+  if (!window.location.pathname.startsWith("/login")) {
+    window.location.href = "/login";
+  }
+}
+
+// Response interceptor to handle token refresh and session expiry
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only attempt refresh for 401 on non-refresh, non-login requests
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/refresh") &&
+      !originalRequest.url?.includes("/auth/login")
+    ) {
       originalRequest._retry = true;
 
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      if (!refreshToken) {
+        redirectToLogin();
+        return Promise.reject(error);
+      }
+
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
-
-          const { accessToken } = response.data;
-          localStorage.setItem("accessToken", accessToken);
-
-          return api(originalRequest);
-        }
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          refreshToken,
+        });
+        const { accessToken } = response.data;
+        localStorage.setItem("accessToken", accessToken);
+        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+        return api(originalRequest);
       } catch {
-        // Refresh failed, redirect to login
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        window.location.href = "/login";
+        // Refresh token is also expired or invalid
+        redirectToLogin();
+        return Promise.reject(error);
       }
     }
 
@@ -167,6 +186,11 @@ export const authApi = {
 
   updateProfile: async (userData: { name: string }) => {
     const response = await api.put("/auth/profile", userData);
+    return response.data;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await api.put("/auth/change-password", { currentPassword, newPassword });
     return response.data;
   },
 
@@ -267,6 +291,41 @@ export const categoriesApi = {
   },
 };
 
+// Users API functions (Admin only)
+export const usersApi = {
+  getAll: async () => {
+    const response = await api.get<{
+      users: Array<{
+        id: string;
+        email: string | null;
+        phone: string | null;
+        name: string;
+        role: string;
+        isActive: boolean;
+        createdAt: string;
+        updatedAt: string;
+        _count: { orders: number };
+      }>;
+    }>("/users");
+    return response.data;
+  },
+
+  create: async (userData: { email?: string; phone?: string; password?: string; name: string; role?: string }) => {
+    const response = await api.post<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: string; isActive: boolean; createdAt: string } }>("/users", userData);
+    return response.data;
+  },
+
+  update: async (id: string, data: { name?: string; phone?: string; role?: string; isActive?: boolean }) => {
+    const response = await api.put<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: string; isActive: boolean } }>(`/users/${id}`, data);
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete<{ message: string }>(`/users/${id}`);
+    return response.data;
+  },
+};
+
 // Orders API functions
 export const ordersApi = {
   getAll: async (filters?: OrderFilters) => {
@@ -322,6 +381,48 @@ export const ordersApi = {
     const response = await api.get("/orders/stats/daily-sales", {
       params: { days },
     });
+    return response.data;
+  },
+};
+
+// Tables API
+export type TableStatus = "AVAILABLE" | "OCCUPIED" | "RESERVED";
+
+export interface Table {
+  id: string;
+  number: string;
+  capacity: number;
+  location?: string;
+  status: TableStatus;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { orders: number };
+}
+
+export const tablesApi = {
+  getAll: async (params?: { isActive?: boolean }) => {
+    const response = await api.get<{ tables: Table[] }>("/tables", { params });
+    return response.data;
+  },
+
+  create: async (data: { number: string; capacity: number; location?: string }) => {
+    const response = await api.post<{ message: string; table: Table }>("/tables", data);
+    return response.data;
+  },
+
+  update: async (id: string, data: { number?: string; capacity?: number; location?: string; isActive?: boolean }) => {
+    const response = await api.put<{ message: string; table: Table }>(`/tables/${id}`, data);
+    return response.data;
+  },
+
+  updateStatus: async (id: string, status: TableStatus) => {
+    const response = await api.patch<{ message: string; table: Table }>(`/tables/${id}/status`, { status });
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.delete<{ message: string }>(`/tables/${id}`);
     return response.data;
   },
 };

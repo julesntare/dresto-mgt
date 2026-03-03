@@ -11,6 +11,7 @@ import {
   Menu,
   Sun,
   Moon,
+  Grid3x3,
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "../../lib/theme-context";
@@ -26,6 +27,7 @@ const navigation = [
     icon: BarChart3,
     roles: ["ADMIN", "MANAGER"],
   },
+  { name: "Tables", href: "/dashboard/tables", icon: Grid3x3, roles: ["ADMIN"] },
   { name: "Users", href: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
   {
     name: "Settings",
