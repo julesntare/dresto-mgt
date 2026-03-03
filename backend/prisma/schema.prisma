@@ -9,7 +9,8 @@ datasource db {
 
 model User {
     id        String   @id @default(cuid())
-    email     String   @unique
+    email     String?  @unique
+    phone     String?
     password  String
     name      String
     role      UserRole @default(STAFF)
@@ -55,6 +56,22 @@ model MenuItem {
     @@map("menu_items")
 }
 
+model Table {
+    id        String      @id @default(cuid())
+    number    String      @unique
+    capacity  Int
+    location  String?
+    status    TableStatus @default(AVAILABLE)
+    isActive  Boolean     @default(true)
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+
+    // Relations
+    orders Order[]
+
+    @@map("tables")
+}
+
 model Order {
     id            String      @id @default(cuid())
     orderNumber   String      @unique
@@ -63,7 +80,7 @@ model Order {
     totalAmount   Decimal     @db.Decimal(10, 2)
     status        OrderStatus @default(PENDING)
     orderType     OrderType   @default(DINE_IN)
-    tableNumber   String?
+    tableId       String?
     notes         String?
     userId        String?
     createdAt     DateTime    @default(now())
@@ -71,6 +88,7 @@ model Order {
 
     // Relations
     user       User?       @relation(fields: [userId], references: [id])
+    table      Table?      @relation(fields: [tableId], references: [id])
     orderItems OrderItem[]
 
     @@map("orders")
@@ -110,4 +128,10 @@ enum OrderType {
     DINE_IN
     TAKEAWAY
     DELIVERY
+}
+
+enum TableStatus {
+    AVAILABLE
+    OCCUPIED
+    RESERVED
 }

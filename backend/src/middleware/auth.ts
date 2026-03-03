@@ -13,7 +13,7 @@ declare global {
     interface Request {
       user?: {
         id: string;
-        email: string;
+        email: string | null;
         role: string;
         name: string;
       };
@@ -50,7 +50,7 @@ export const authenticateToken = async (
     req.user = user;
     next();
   } catch (error) {
-    res.status(403).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Token expired or invalid" });
     return;
   }
 };

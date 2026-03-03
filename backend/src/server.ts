@@ -15,6 +15,8 @@ import authRoutes from "./routes/auth";
 import menuRoutes from "./routes/menu";
 import orderRoutes from "./routes/orders";
 import categoryRoutes from "./routes/categories";
+import userRoutes from "./routes/users";
+import tableRoutes from "./routes/tables";
 import { prisma } from "./lib/prisma";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -50,6 +52,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/menu", menuRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/tables", tableRoutes);
 // 404 handler
 // API Documentation
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

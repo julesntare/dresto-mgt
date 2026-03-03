@@ -69,6 +69,19 @@ const options: swaggerJsdoc.Options = {
             updatedAt: { type: 'string', format: 'date-time' },
           },
         },
+        Table: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            number: { type: 'string', example: 'T1' },
+            capacity: { type: 'integer', example: 4 },
+            location: { type: 'string', example: 'Main Hall' },
+            status: { type: 'string', enum: ['AVAILABLE', 'OCCUPIED', 'RESERVED'] },
+            isActive: { type: 'boolean' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
         Order: {
           type: 'object',
           properties: {
@@ -77,7 +90,8 @@ const options: swaggerJsdoc.Options = {
             customerName: { type: 'string' },
             customerPhone: { type: 'string' },
             orderType: { type: 'string', enum: ['DINE_IN', 'TAKEAWAY', 'DELIVERY'] },
-            tableNumber: { type: 'string' },
+            tableId: { type: 'string' },
+            table: { $ref: '#/components/schemas/Table' },
             status: {
               type: 'string',
               enum: ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED', 'CANCELLED'],

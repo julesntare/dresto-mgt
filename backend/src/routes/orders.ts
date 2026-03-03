@@ -415,6 +415,9 @@ router.get("/", authenticateToken, async (req, res) => {
           user: {
             select: { id: true, name: true, email: true },
           },
+          table: {
+            select: { id: true, number: true, location: true },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -456,6 +459,9 @@ router.get("/:id", authenticateToken, (async (req, res) => {
         user: {
           select: { id: true, name: true, email: true },
         },
+        table: {
+          select: { id: true, number: true, location: true },
+        },
       },
     });
 
@@ -482,11 +488,24 @@ router.post(
         customerName,
         customerPhone,
         orderType,
-        tableNumber,
+        tableId,
         notes,
         items,
       } = req.body;
       const userId = req.user!.id;
+
+      // Validate table for DINE_IN orders
+      if (orderType === "DINE_IN" && tableId) {
+        const table = await prisma.table.findUnique({ where: { id: tableId } });
+        if (!table) {
+          return res.status(400).json({ message: "Table not found" });
+        }
+        if (table.status !== "AVAILABLE") {
+          return res
+            .status(400)
+            .json({ message: "Table is not available" });
+        }
+      }
 
       // Validate menu items and calculate total
       const menuItemIds = items.map((item: any) => item.menuItemId);
@@ -530,7 +549,7 @@ router.post(
           customerPhone,
           totalAmount,
           orderType,
-          tableNumber,
+          tableId: orderType === "DINE_IN" ? tableId || null : null,
           notes,
           userId,
           orderItems: {
@@ -548,8 +567,19 @@ router.post(
           user: {
             select: { id: true, name: true },
           },
+          table: {
+            select: { id: true, number: true, location: true },
+          },
         },
       });
+
+      // Mark table as OCCUPIED
+      if (orderType === "DINE_IN" && tableId) {
+        await prisma.table.update({
+          where: { id: tableId },
+          data: { status: "OCCUPIED" },
+        });
+      }
 
       res.status(201).json({
         message: "Order created successfully",
@@ -581,6 +611,11 @@ router.patch("/:id/status", authenticateToken, (async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
     }
 
+    const existingOrder = await prisma.order.findUnique({ where: { id } });
+    if (!existingOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     const order = await prisma.order.update({
       where: { id },
       data: { status },
@@ -592,8 +627,22 @@ router.patch("/:id/status", authenticateToken, (async (req, res) => {
             },
           },
         },
+        table: {
+          select: { id: true, number: true, location: true },
+        },
       },
     });
+
+    // Free the table when order is completed or cancelled
+    if (
+      ["DELIVERED", "CANCELLED"].includes(status) &&
+      existingOrder.tableId
+    ) {
+      await prisma.table.update({
+        where: { id: existingOrder.tableId },
+        data: { status: "AVAILABLE" },
+      });
+    }
 
     res.json({
       message: "Order status updated successfully",
@@ -613,7 +662,7 @@ router.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { customerName, customerPhone, orderType, tableNumber, notes } =
+      const { customerName, customerPhone, orderType, tableId, notes } =
         req.body;
 
       const order = await prisma.order.update({
@@ -622,7 +671,7 @@ router.put(
           customerName,
           customerPhone,
           orderType,
-          tableNumber,
+          tableId: tableId ?? undefined,
           notes,
         },
         include: {
@@ -632,6 +681,9 @@ router.put(
                 select: { id: true, name: true, price: true },
               },
             },
+          },
+          table: {
+            select: { id: true, number: true, location: true },
           },
         },
       });
@@ -675,6 +727,14 @@ router.patch("/:id/cancel", authenticateToken, (async (req, res) => {
       },
     });
 
+    // Free the table
+    if (order.tableId) {
+      await prisma.table.update({
+        where: { id: order.tableId },
+        data: { status: "AVAILABLE" },
+      });
+    }
+
     res.json({
       message: "Order cancelled successfully",
       order: updatedOrder,
@@ -710,6 +770,7 @@ router.get(
         cancelledOrders,
         pendingOrders,
         totalRevenue,
+        ordersByType,
       ] = await Promise.all([
         prisma.order.count({ where: dateFilter }),
         prisma.order.count({ where: { ...dateFilter, status: "DELIVERED" } }),
@@ -724,7 +785,16 @@ router.get(
           where: { ...dateFilter, status: "DELIVERED" },
           _sum: { totalAmount: true },
         }),
+        prisma.order.groupBy({
+          by: ["orderType"],
+          where: dateFilter,
+          _count: { id: true },
+          _sum: { totalAmount: true },
+        }),
       ]);
+
+      const revenue = Number(totalRevenue._sum.totalAmount || 0);
+      const averageOrderValue = completedOrders > 0 ? revenue / completedOrders : 0;
 
       // Get popular items
       const popularItems = await prisma.orderItem.groupBy({
@@ -735,7 +805,7 @@ router.get(
             status: "DELIVERED",
           },
         },
-        _sum: { quantity: true },
+        _sum: { quantity: true, price: true },
         _count: { menuItemId: true },
         orderBy: { _sum: { quantity: "desc" } },
         take: 10,
@@ -760,11 +830,17 @@ router.get(
           completedOrders,
           cancelledOrders,
           pendingOrders,
-          totalRevenue: totalRevenue._sum.totalAmount || 0,
+          totalRevenue: revenue,
+          averageOrderValue,
           completionRate:
             totalOrders > 0
               ? ((completedOrders / totalOrders) * 100).toFixed(2)
               : 0,
+          ordersByType: ordersByType.map((t) => ({
+            type: t.orderType,
+            count: t._count.id,
+            revenue: Number(t._sum.totalAmount || 0),
+          })),
           popularItems: popularItemsWithDetails,
         },
       });
