@@ -20,6 +20,18 @@
       "key": "refreshToken",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "orderAccessToken",
+      "value": "",
+      "type": "string",
+      "description": "UUID returned by POST /orders. Used to track a single order without authentication."
+    },
+    {
+      "key": "guestSessionToken",
+      "value": "",
+      "type": "string",
+      "description": "UUID generated once per customer by the mobile app. Sent with every order to group all orders by the same customer. Persisted in app storage."
     }
   ],
   "item": [
@@ -288,6 +300,37 @@
       "name": "Orders",
       "item": [
         {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/mine",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "mine"],
+              "query": [
+                { "key": "status", "value": "PENDING", "disabled": true, "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED" },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "limit", "value": "10", "disabled": true }
+              ]
+            },
+            "description": "Returns paginated orders belonging to the authenticated user (filtered by userId)."
+          }
+        },
+        {
+          "name": "Track Order by Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "track", "{{orderAccessToken}}"]
+            },
+            "description": "Public — no auth required. Use the accessToken returned by POST /orders to track any order (guest or logged-in)."
+          }
+        },
+        {
           "name": "Get All Orders",
           "request": {
             "method": "GET",
@@ -545,28 +588,82 @@
         },
         {
           "name": "4. Place Order (Guest)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.order && res.order.accessToken) {",
+                  "  pm.collectionVariables.set('orderAccessToken', res.order.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
             },
-            "description": "No Authorization header needed. userId will be null. orderType: DINE_IN | TAKEAWAY | DELIVERY. tableId only required for DINE_IN."
+            "description": "No Authorization header needed. Include guestSessionToken (UUID generated once per customer by the mobile app). Response includes accessToken — saved automatically to {{orderAccessToken}}."
           }
         },
         {
           "name": "4. Place Order (Guest - Takeaway)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.order && res.order.accessToken) {",
+                  "  pm.collectionVariables.set('orderAccessToken', res.order.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"TAKEAWAY\",\n  \"notes\": \"Ready in 15 minutes\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 1 }\n  ]\n}"
+              "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"TAKEAWAY\",\n  \"notes\": \"Ready in 15 minutes\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 1 }\n  ]\n}"
             },
-            "description": "No Authorization header needed. No tableId for TAKEAWAY."
+            "description": "No Authorization header needed. No tableId for TAKEAWAY. Response includes accessToken — saved automatically to {{orderAccessToken}}."
+          }
+        },
+        {
+          "name": "5. Track Single Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "track", "{{orderAccessToken}}"]
+            },
+            "description": "Public — no auth required. Uses the accessToken auto-saved from step 4. Tracks one specific order."
+          }
+        },
+        {
+          "name": "6. Get All My Orders (Session)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/session/{{guestSessionToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "session", "{{guestSessionToken}}"]
+            },
+            "description": "Public — no auth required. Returns ALL orders placed with this guestSessionToken. The mobile app generates this UUID once (on install or per session) and reuses it across orders. Multiple customers at the same table each have their own UUID."
           }
         }
       ]

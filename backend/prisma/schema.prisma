@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
 }
 
 model User {
@@ -75,14 +74,16 @@ model Table {
 model Order {
     id            String      @id @default(cuid())
     orderNumber   String      @unique
-    customerName  String?
-    customerPhone String?
-    totalAmount   Decimal     @db.Decimal(10, 2)
-    status        OrderStatus @default(PENDING)
-    orderType     OrderType   @default(DINE_IN)
-    tableId       String?
-    notes         String?
-    userId        String?
+    accessToken       String      @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    guestSessionToken String?
+    customerName      String?
+    customerPhone     String?
+    totalAmount       Decimal     @db.Decimal(10, 2)
+    status            OrderStatus @default(PENDING)
+    orderType         OrderType   @default(DINE_IN)
+    tableId           String?
+    notes             String?
+    userId            String?
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
 
