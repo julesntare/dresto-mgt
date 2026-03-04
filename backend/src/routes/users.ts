@@ -136,6 +136,31 @@ router.put("/:id", (async (req, res) => {
   }
 }) as RequestHandler);
 
+// PATCH /users/:id/password - Reset a user's password (admin only)
+router.patch("/:id/password", (async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({ where: { id }, data: { password: hashedPassword } });
+
+    res.json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({ message: "Failed to reset password" });
+  }
+}) as RequestHandler);
+
 // DELETE /users/:id - Delete a user
 router.delete("/:id", (async (req, res) => {
   try {

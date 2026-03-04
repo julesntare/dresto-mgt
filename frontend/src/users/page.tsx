@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { usersApi } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
-import { Plus, Edit2, Trash2, Users, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Edit2, Trash2, Users, ToggleLeft, ToggleRight, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 
 type Role = 'ADMIN' | 'MANAGER' | 'STAFF'
@@ -59,6 +59,14 @@ export default function UsersPage() {
   // Delete confirm
   const [deleteConfirm, setDeleteConfirm] = useState<User | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Reset password
+  const [resetUser, setResetUser] = useState<User | null>(null)
+  const [resetPassword, setResetPassword] = useState('')
+  const [resetConfirm, setResetConfirm] = useState('')
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetting, setResetting] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState(false)
 
   const fetchUsers = async () => {
     try {
@@ -154,6 +162,34 @@ export default function UsersPage() {
     }
   }
 
+  const openResetPassword = (u: User) => {
+    setResetUser(u)
+    setResetPassword('')
+    setResetConfirm('')
+    setResetError(null)
+    setResetSuccess(false)
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetUser) return
+    if (!resetPassword) { setResetError('New password is required.'); return }
+    if (resetPassword.length < 6) { setResetError('Password must be at least 6 characters.'); return }
+    if (resetPassword !== resetConfirm) { setResetError('Passwords do not match.'); return }
+    setResetting(true)
+    setResetError(null)
+    try {
+      await usersApi.resetPassword(resetUser.id, resetPassword)
+      setResetSuccess(true)
+      setResetPassword('')
+      setResetConfirm('')
+      setTimeout(() => setResetUser(null), 1500)
+    } catch (err: unknown) {
+      setResetError(err instanceof Error ? err.message : 'Failed to reset password.')
+    } finally {
+      setResetting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -244,6 +280,11 @@ export default function UsersPage() {
                   <button onClick={() => openEdit(u)} className="text-indigo-600 hover:text-indigo-900 transition-colors" title="Edit">
                     <Edit2 className="h-4 w-4" />
                   </button>
+                  {u.id !== currentUser?.id && (
+                    <button onClick={() => openResetPassword(u)} className="text-amber-500 hover:text-amber-700 transition-colors" title="Reset Password">
+                      <KeyRound className="h-4 w-4" />
+                    </button>
+                  )}
                   {u.id !== currentUser?.id && (
                     <button onClick={() => setDeleteConfirm(u)} className="text-red-500 hover:text-red-700 transition-colors" title="Delete">
                       <Trash2 className="h-4 w-4" />
@@ -394,6 +435,62 @@ export default function UsersPage() {
               <button onClick={handleEdit} disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors">
                 {saving ? 'Saving…' : 'Save'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Reset Password</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Set a new password for <strong>{resetUser.name}</strong></p>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              {resetSuccess ? (
+                <div className="flex items-center gap-2 text-green-600 text-sm py-2">
+                  <KeyRound className="h-4 w-4" />
+                  Password reset successfully. The user can now log in with the new password.
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password <span className="text-red-500">*</span></label>
+                    <input
+                      type="password"
+                      value={resetPassword}
+                      onChange={(e) => setResetPassword(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="Min. 6 characters"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password <span className="text-red-500">*</span></label>
+                    <input
+                      type="password"
+                      value={resetConfirm}
+                      onChange={(e) => setResetConfirm(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="Repeat new password"
+                    />
+                  </div>
+                  {resetError && <p className="text-sm text-red-600">{resetError}</p>}
+                  <p className="text-xs text-gray-400">After resetting, share the new password with the user. They can change it themselves in Settings.</p>
+                </>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button onClick={() => setResetUser(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                {resetSuccess ? 'Close' : 'Cancel'}
+              </button>
+              {!resetSuccess && (
+                <button onClick={handleResetPassword} disabled={resetting} className="px-4 py-2 text-sm bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:opacity-50 transition-colors">
+                  {resetting ? 'Resetting…' : 'Reset Password'}
+                </button>
+              )}
             </div>
           </div>
         </div>

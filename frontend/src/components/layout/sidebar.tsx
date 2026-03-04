@@ -29,12 +29,7 @@ const navigation = [
   },
   { name: "Tables", href: "/dashboard/tables", icon: Grid3x3, roles: ["ADMIN"] },
   { name: "Users", href: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
-  {
-    name: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    roles: ["ADMIN"],
-  },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export default function Sidebar() {

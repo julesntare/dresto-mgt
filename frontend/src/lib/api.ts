@@ -324,6 +324,11 @@ export const usersApi = {
     const response = await api.delete<{ message: string }>(`/users/${id}`);
     return response.data;
   },
+
+  resetPassword: async (id: string, newPassword: string) => {
+    const response = await api.patch<{ message: string }>(`/users/${id}/password`, { newPassword });
+    return response.data;
+  },
 };
 
 // Orders API functions
