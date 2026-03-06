@@ -33,7 +33,7 @@ interface DailySales {
 }
 
 function formatCurrency(amount: number): string {
-  return `RWF ${Math.round(amount).toLocaleString("en-US")}`;
+  return `${Math.round(amount).toLocaleString("en-US")} RWF`;
 }
 
 const ORDER_TYPE_COLORS: Record<string, string> = {

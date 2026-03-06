@@ -226,7 +226,7 @@ export default function MenuPage() {
                 <div className="mt-auto flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-400">{item.category?.name}</p>
-                    <p className="font-bold text-indigo-600">RWF {Math.round(Number(item.price)).toLocaleString()}</p>
+                    <p className="font-bold text-indigo-600">{Math.round(Number(item.price)).toLocaleString()} RWF</p>
                   </div>
                   {canEdit && (
                     <div className="flex items-center gap-2">
@@ -288,7 +288,7 @@ export default function MenuPage() {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="0.00"
+                    placeholder="0"
                   />
                 </div>
                 <div>

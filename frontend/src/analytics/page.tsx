@@ -44,7 +44,7 @@ const RANGE_OPTIONS = [
 ]
 
 function formatCurrency(amount: number) {
-  return `RWF ${Math.round(amount).toLocaleString('en-US')}`
+  return `${Math.round(amount).toLocaleString('en-US')}RWF`
 }
 
 export default function AnalyticsPage() {

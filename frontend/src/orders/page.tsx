@@ -59,6 +59,11 @@ const ORDER_TYPE_LABEL: Record<OrderType, string> = {
   DELIVERY: 'Delivery',
 }
 
+const getStatusLabel = (status: OrderStatus, orderType: OrderType): string => {
+  if (status === 'DELIVERED' && orderType === 'DINE_IN') return 'Served'
+  return status.charAt(0) + status.slice(1).toLowerCase()
+}
+
 interface NewOrderItem { menuItemId: string; quantity: number; name: string; price: number }
 interface NewOrderForm {
   customerName: string
@@ -291,10 +296,10 @@ export default function OrdersPage() {
                         <td className="px-4 py-3 text-sm text-gray-500">{ORDER_TYPE_LABEL[order.orderType]}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
-                            {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
+                            {getStatusLabel(order.status, order.orderType)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">RWF {Math.round(Number(order.totalAmount)).toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{Math.round(Number(order.totalAmount)).toLocaleString()} RWF</td>
                         <td className="px-4 py-3 text-sm text-gray-500">{format(new Date(order.createdAt), 'MMM dd, HH:mm')}</td>
                         <td className="px-4 py-3 text-right">
                           <button
@@ -377,7 +382,7 @@ export default function OrdersPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-500">Status</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[detailOrder.status]}`}>
-                    {detailOrder.status.charAt(0) + detailOrder.status.slice(1).toLowerCase()}
+                    {getStatusLabel(detailOrder.status, detailOrder.orderType)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -393,13 +398,13 @@ export default function OrdersPage() {
                   {detailOrder.orderItems.map((item, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-gray-700">{item.menuItem?.name ?? 'Item'} × {item.quantity}</span>
-                      <span className="font-medium">RWF {Math.round(Number(item.price) * item.quantity).toLocaleString()}</span>
+                      <span className="font-medium">{Math.round(Number(item.price) * item.quantity).toLocaleString()} RWF</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex justify-between font-semibold text-sm border-t border-gray-100 pt-2 mt-2">
                   <span>Total</span>
-                  <span>RWF {Math.round(Number(detailOrder.totalAmount)).toLocaleString()}</span>
+                  <span>{Math.round(Number(detailOrder.totalAmount)).toLocaleString()} RWF</span>
                 </div>
               </div>
 
@@ -424,7 +429,7 @@ export default function OrdersPage() {
                           : 'bg-indigo-600 text-white hover:bg-indigo-700'
                       }`}
                     >
-                      {nextStatus === 'CANCELLED' ? 'Cancel Order' : `Mark as ${nextStatus.charAt(0) + nextStatus.slice(1).toLowerCase()}`}
+                      {nextStatus === 'CANCELLED' ? 'Cancel Order' : `Mark as ${getStatusLabel(nextStatus, detailOrder.orderType)}`}
                     </button>
                   ))}
                 </div>
@@ -468,7 +473,7 @@ export default function OrdersPage() {
                         <p className="text-sm font-medium text-gray-900">{item.name}</p>
                         <p className="text-xs text-gray-500">{item.category?.name}</p>
                       </div>
-                      <span className="text-sm font-semibold text-indigo-600">RWF {Math.round(Number(item.price)).toLocaleString()}</span>
+                      <span className="text-sm font-semibold text-indigo-600">{Math.round(Number(item.price)).toLocaleString()} RWF</span>
                     </button>
                   ))}
                 </div>
@@ -487,7 +492,7 @@ export default function OrdersPage() {
                         <div key={item.menuItemId} className="flex items-center gap-2 text-sm">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                            <p className="text-xs text-gray-500">RWF {Math.round(item.price).toLocaleString()} each</p>
+                            <p className="text-xs text-gray-500">{Math.round(item.price).toLocaleString()} RWF each</p>
                           </div>
                           <div className="flex items-center gap-1">
                             <button onClick={() => updateItemQty(item.menuItemId, item.quantity - 1)} className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100">−</button>
@@ -504,7 +509,7 @@ export default function OrdersPage() {
                   {newOrder.items.length > 0 && (
                     <div className="flex justify-between font-semibold text-sm border-t border-gray-100 pt-2 mt-3">
                       <span>Total</span>
-                      <span>RWF {Math.round(orderTotal).toLocaleString()}</span>
+                      <span>{Math.round(orderTotal).toLocaleString()} RWF</span>
                     </div>
                   )}
                 </div>
