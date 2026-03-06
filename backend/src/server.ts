@@ -23,6 +23,9 @@ import { errorHandler } from "./middleware/errorHandler";
 const app = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
+// Trust the first proxy so express-rate-limit can read X-Forwarded-For correctly
+app.set('trust proxy', 1);
+
 // Rate limiting — strict only on sensitive auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
