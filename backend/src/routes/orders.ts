@@ -392,6 +392,11 @@ router.get("/", authenticateToken, async (req, res) => {
 
     const where: any = {};
 
+    // Customers can only see their own orders
+    if (req.user!.role === "CUSTOMER") {
+      where.userId = req.user!.id;
+    }
+
     if (status) where.status = status;
     if (orderType) where.orderType = orderType;
     if (startDate && endDate) {
@@ -408,7 +413,7 @@ router.get("/", authenticateToken, async (req, res) => {
           orderItems: {
             include: {
               menuItem: {
-                select: { id: true, name: true, price: true },
+                select: { id: true, name: true, price: true, category: { select: { name: true } } },
               },
             },
           },
@@ -479,7 +484,7 @@ router.get("/session/:sessionToken", (async (req, res) => {
         orderItems: {
           include: {
             menuItem: {
-              select: { id: true, name: true, price: true, image: true },
+              select: { id: true, name: true, price: true, image: true, category: { select: { name: true } } },
             },
           },
         },
@@ -612,7 +617,7 @@ router.get("/track/:token", (async (req, res) => {
       orderItems: {
         include: {
           menuItem: {
-            select: { id: true, name: true, price: true, image: true },
+            select: { id: true, name: true, price: true, image: true, category: { select: { name: true } } },
           },
         },
       },
@@ -648,7 +653,7 @@ router.get("/:id", authenticateToken, (async (req, res) => {
         orderItems: {
           include: {
             menuItem: {
-              select: { id: true, name: true, price: true, image: true },
+              select: { id: true, name: true, price: true, image: true, category: { select: { name: true } } },
             },
           },
         },
@@ -663,6 +668,11 @@ router.get("/:id", authenticateToken, (async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Customers can only view their own orders
+    if (req.user!.role === "CUSTOMER" && order.userId !== req.user!.id) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     res.json({ order });
@@ -791,8 +801,8 @@ router.post(
   }) as RequestHandler
 );
 
-// Update order status
-router.patch("/:id/status", authenticateToken, (async (req, res) => {
+// Update order status (staff/manager/admin only — customers cannot change status)
+router.patch("/:id/status", authenticateToken, requireRole(["ADMIN", "MANAGER", "STAFF"]), (async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -910,6 +920,11 @@ router.patch("/:id/cancel", authenticateToken, (async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Customers can only cancel their own orders
+    if (req.user!.role === "CUSTOMER" && order.userId !== req.user!.id) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     if (["DELIVERED", "CANCELLED"].includes(order.status)) {

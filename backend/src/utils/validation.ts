@@ -27,12 +27,19 @@ export const registerValidation = [
     .trim()
     .isLength({ min: 2 })
     .withMessage("Name must be at least 2 characters"),
-  body("role").optional().isIn(["ADMIN", "MANAGER", "STAFF"]),
+  body("phone").optional().trim(),
 ];
 
 export const loginValidation = [
-  body("email").isEmail().normalizeEmail(),
+  body("email").optional().isEmail().normalizeEmail(),
+  body("phone").optional().trim(),
   body("password").notEmpty().withMessage("Password is required"),
+  body().custom((_, { req }) => {
+    if (!req.body.email && !req.body.phone) {
+      throw new Error("Email or phone number is required");
+    }
+    return true;
+  }),
 ];
 
 // Menu item validation

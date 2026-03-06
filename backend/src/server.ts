@@ -21,7 +21,7 @@ import { prisma } from "./lib/prisma";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
 
 // Rate limiting — strict only on sensitive auth endpoints
 const authLimiter = rateLimit({
@@ -97,7 +97,7 @@ process.on("SIGINT", async () => {
   process.exit(0);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📱 Environment: ${process.env.NODE_ENV}`);
 });

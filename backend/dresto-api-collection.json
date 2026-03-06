@@ -39,19 +39,20 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Register",
+          "name": "Register (Customer self-registration)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@dresto.com\",\n  \"password\": \"password123\",\n  \"name\": \"Admin User\",\n  \"role\": \"ADMIN\"\n}"
-            }
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John Doe\",\n  \"phone\": \"08123456789\"\n}"
+            },
+            "description": "Public endpoint — always creates a CUSTOMER account regardless of input. Staff/Manager/Admin accounts are created by an Admin via POST /users."
           }
         },
         {
-          "name": "Login",
+          "name": "Login (with email)",
           "event": [
             {
               "listen": "test",
@@ -74,7 +75,36 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@dresto.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Login with email. Either email or phone is required."
+          }
+        },
+        {
+          "name": "Login (with phone)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"08123456789\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Login with phone number. Either email or phone is required."
           }
         },
         {
@@ -347,7 +377,8 @@
                 { "key": "page", "value": "1", "disabled": true },
                 { "key": "limit", "value": "10", "disabled": true }
               ]
-            }
+            },
+            "description": "Requires auth. ADMIN/MANAGER/STAFF see all orders. CUSTOMER role automatically sees only their own orders (filtered by userId server-side)."
           }
         },
         {
@@ -402,7 +433,7 @@
               "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "description": "Valid statuses: PENDING, CONFIRMED, PREPARING, READY, DELIVERED, CANCELLED"
+            "description": "ADMIN/MANAGER/STAFF only — CUSTOMER role is not allowed. Valid statuses: PENDING → CONFIRMED → PREPARING → READY → DELIVERED | CANCELLED"
           }
         },
         {
@@ -669,6 +700,146 @@
       ]
     },
     {
+      "name": "Customer Ordering (Logged In)",
+      "description": "Flow for authenticated CUSTOMER accounts. Register → Login → Browse → Order → Track.",
+      "item": [
+        {
+          "name": "1. Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John Doe\",\n  \"phone\": \"08123456789\"\n}"
+            },
+            "description": "Always creates a CUSTOMER account."
+          }
+        },
+        {
+          "name": "2. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Browse Menu",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu?available=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["menu"],
+              "query": [
+                { "key": "available", "value": "true" },
+                { "key": "categoryId", "value": "", "disabled": true },
+                { "key": "search", "value": "", "disabled": true }
+              ]
+            },
+            "description": "Public — no auth needed."
+          }
+        },
+        {
+          "name": "4. Place Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.order && res.order.accessToken) {",
+                  "  pm.collectionVariables.set('orderAccessToken', res.order.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+            },
+            "description": "Order is linked to the authenticated CUSTOMER via userId. accessToken is auto-saved for tracking."
+          }
+        },
+        {
+          "name": "5. Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/orders/mine",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "mine"],
+              "query": [
+                { "key": "status", "value": "PENDING", "disabled": true },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "limit", "value": "10", "disabled": true }
+              ]
+            },
+            "description": "Returns only the authenticated customer's orders, paginated."
+          }
+        },
+        {
+          "name": "6. Track Order by Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders", "track", "{{orderAccessToken}}"]
+            },
+            "description": "Public — no auth needed. Uses the accessToken from step 4."
+          }
+        },
+        {
+          "name": "7. Cancel Own Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/cancel", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "cancel"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
+            },
+            "description": "CUSTOMER can only cancel their own orders. Returns 403 if the order belongs to a different user. Only cancellable if status is not DELIVERED or CANCELLED."
+          }
+        }
+      ]
+    },
+    {
       "name": "Users",
       "description": "All endpoints require ADMIN role",
       "item": [
@@ -691,9 +862,9 @@
             "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Staff Member\",\n  \"email\": \"staff@dresto.com\",\n  \"phone\": \"08123456789\",\n  \"password\": \"password123\",\n  \"role\": \"STAFF\"\n}"
+              "raw": "{\n  \"name\": \"Staff Member\",\n  \"email\": \"staff@dresto.com\",\n  \"phone\": \"08123456789\",\n  \"role\": \"STAFF\"\n}"
             },
-            "description": "email + password optional. If email is provided, password is required. role: ADMIN | MANAGER | STAFF"
+            "description": "Admin only. password is optional — defaults to '123456' if omitted. role: ADMIN | MANAGER | STAFF (use POST /auth/register for CUSTOMER accounts)"
           }
         },
         {

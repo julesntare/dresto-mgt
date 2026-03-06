@@ -163,7 +163,7 @@ router.post("/register", registerValidation, handleValidationErrors, (async (
   res
 ) => {
   try {
-    const { email, password, name, role = "STAFF" } = req.body;
+    const { email, password, name, phone } = req.body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -177,13 +177,15 @@ router.post("/register", registerValidation, handleValidationErrors, (async (
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Self-registration always creates a CUSTOMER account.
+    // Staff/Manager/Admin accounts are created via the /users admin endpoint.
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        role,
+        phone: phone || null,
+        role: "CUSTOMER",
       },
       select: {
         id: true,
@@ -210,12 +212,12 @@ router.post("/login", loginValidation, handleValidationErrors, (async (
   res
 ) => {
   try {
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    // Find user by email or phone
+    const user = email
+      ? await prisma.user.findUnique({ where: { email } })
+      : await prisma.user.findFirst({ where: { phone } });
 
     if (!user || !user.isActive) {
       return res.status(401).json({ message: "Invalid credentials" });

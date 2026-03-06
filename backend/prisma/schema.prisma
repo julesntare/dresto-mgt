@@ -114,6 +114,7 @@ enum UserRole {
     ADMIN
     MANAGER
     STAFF
+    CUSTOMER
 }
 
 enum OrderStatus {

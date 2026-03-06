@@ -1,6 +1,5 @@
 import express from "express";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { prisma } from "../lib/prisma";
 import { authenticateToken, requireRole } from "../middleware/auth";
 import { RequestHandler } from "express";
@@ -44,11 +43,6 @@ router.post("/", (async (req, res) => {
       return res.status(400).json({ message: "Name is required" });
     }
 
-    // If email is provided, password is required
-    if (email && !password) {
-      return res.status(400).json({ message: "Password is required when email is provided" });
-    }
-
     if (password && password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
@@ -65,8 +59,7 @@ router.post("/", (async (req, res) => {
       }
     }
 
-    // Use provided password, or generate a random one for non-login accounts
-    const rawPassword = password || crypto.randomBytes(32).toString("hex");
+    const rawPassword = password || "123456";
     const hashedPassword = await bcrypt.hash(rawPassword, 12);
 
     const user = await prisma.user.create({
