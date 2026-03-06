@@ -142,8 +142,8 @@ export default function MenuPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Menu Items</h1>
-          <p className="text-gray-500 mt-1 text-sm">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Menu Items</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{items.length} item{items.length !== 1 ? 's' : ''}</p>
         </div>
         {canEdit && (
           <button
@@ -156,24 +156,24 @@ export default function MenuPage() {
         )}
       </div>
 
-      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 text-sm">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg mb-4 text-sm">{error}</div>}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-50">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Search items…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">All Categories</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -181,7 +181,7 @@ export default function MenuPage() {
         <select
           value={filterAvailable}
           onChange={(e) => setFilterAvailable(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">All Availability</option>
           <option value="true">Available</option>
@@ -192,45 +192,47 @@ export default function MenuPage() {
       {/* Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900" />
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 dark:border-gray-100" />
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm flex flex-col items-center justify-center py-16">
-          <UtensilsCrossed className="h-12 w-12 text-gray-300 mb-3" />
-          <p className="text-gray-500">No menu items found.</p>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm flex flex-col items-center justify-center py-16">
+          <UtensilsCrossed className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" />
+          <p className="text-gray-500 dark:text-gray-400">No menu items found.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+            <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden flex flex-col">
               {/* Image */}
-              <div className="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div className="h-40 bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                 {item.image ? (
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
-                  <ImageOff className="h-10 w-10 text-gray-300" />
+                  <ImageOff className="h-10 w-10 text-gray-300 dark:text-gray-600" />
                 )}
               </div>
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="font-semibold text-gray-900 text-sm leading-tight">{item.name}</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight">{item.name}</h3>
                   <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${
-                    item.isAvailable ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                    item.isAvailable
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                   }`}>
                     {item.isAvailable ? 'Available' : 'Unavailable'}
                   </span>
                 </div>
                 {item.description && (
-                  <p className="text-xs text-gray-500 mb-2 line-clamp-2">{item.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{item.description}</p>
                 )}
                 <div className="mt-auto flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-400">{item.category?.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{item.category?.name}</p>
                     <p className="font-bold text-indigo-600">{Math.round(Number(item.price)).toLocaleString()} RWF</p>
                   </div>
                   {canEdit && (
                     <div className="flex items-center gap-2">
-                      <button onClick={() => openEdit(item)} className="text-indigo-600 hover:text-indigo-900 transition-colors" title="Edit">
+                      <button onClick={() => openEdit(item)} className="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 transition-colors" title="Edit">
                         <Edit2 className="h-4 w-4" />
                       </button>
                       {canDelete && (
@@ -250,53 +252,53 @@ export default function MenuPage() {
       {/* Create/Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 shrink-0">
-              <h2 className="text-lg font-semibold text-gray-900">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editingItem ? 'Edit Menu Item' : 'Create Menu Item'}
               </h2>
             </div>
             <div className="px-6 py-4 space-y-4 overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="e.g. Grilled Chicken"
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   placeholder="Optional description"
                   rows={2}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (RWF) <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (RWF) <span className="text-red-500">*</span></label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     placeholder="0"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category <span className="text-red-500">*</span></label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Select…</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -304,12 +306,12 @@ export default function MenuPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image URL</label>
                 <input
                   type="url"
                   value={formData.image}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="https://…"
                 />
               </div>
@@ -320,12 +322,12 @@ export default function MenuPage() {
                   onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="text-sm font-medium text-gray-700">Available for ordering</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Available for ordering</span>
               </label>
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
+              {formError && <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>}
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 shrink-0">
-              <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3 shrink-0">
+              <button onClick={() => setModalOpen(false)} className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors">
                 {saving ? 'Saving…' : 'Save'}
               </button>
@@ -337,17 +339,17 @@ export default function MenuPage() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Delete Item</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Delete Item</h2>
             </div>
             <div className="px-6 py-4">
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Are you sure you want to delete <strong>{deleteConfirm.name}</strong>? This cannot be undone.
               </p>
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-              <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+              <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
               <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors">
                 {deleting ? 'Deleting…' : 'Delete'}
               </button>

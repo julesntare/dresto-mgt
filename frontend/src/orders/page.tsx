@@ -36,12 +36,12 @@ interface MenuItem { id: string; name: string; price: number; isAvailable: boole
 interface Category { id: string; name: string }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-blue-100 text-blue-800',
-  PREPARING: 'bg-orange-100 text-orange-800',
-  READY: 'bg-purple-100 text-purple-800',
-  DELIVERED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-gray-100 text-gray-600',
+  PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+  CONFIRMED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  PREPARING: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+  READY: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+  DELIVERED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+  CANCELLED: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
 }
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -217,8 +217,8 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-500 mt-1 text-sm">Manage restaurant orders</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Orders</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Manage restaurant orders</p>
         </div>
         <button
           onClick={openCreate}
@@ -229,14 +229,14 @@ export default function OrdersPage() {
         </button>
       </div>
 
-      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4 text-sm">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-4 rounded-lg mb-4 text-sm">{error}</div>}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-3">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-3">
         <select
           value={filterStatus}
           onChange={(e) => { setFilterStatus(e.target.value); setPage(1) }}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">All Statuses</option>
           {(['PENDING','CONFIRMED','PREPARING','READY','DELIVERED','CANCELLED'] as OrderStatus[]).map((s) => (
@@ -246,7 +246,7 @@ export default function OrdersPage() {
         <select
           value={filterType}
           onChange={(e) => { setFilterType(e.target.value); setPage(1) }}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">All Types</option>
           {(['DINE_IN','TAKEAWAY','DELIVERY'] as OrderType[]).map((t) => (
@@ -258,53 +258,53 @@ export default function OrdersPage() {
       <div className="flex gap-6">
         {/* Orders Table */}
         <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900" />
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 dark:border-gray-100" />
               </div>
             ) : (
               <>
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order #</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {orders.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-12 text-center">
-                          <ShoppingCart className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                          <p className="text-gray-500">No orders found.</p>
+                          <ShoppingCart className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                          <p className="text-gray-500 dark:text-gray-400">No orders found.</p>
                         </td>
                       </tr>
                     ) : orders.map((order) => (
                       <tr
                         key={order.id}
-                        className={`hover:bg-gray-50 cursor-pointer transition-colors ${detailOrder?.id === order.id ? 'bg-indigo-50' : ''}`}
+                        className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${detailOrder?.id === order.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}
                         onClick={() => setDetailOrder(detailOrder?.id === order.id ? null : order)}
                       >
-                        <td className="px-4 py-3 text-sm font-mono font-medium text-gray-900">{order.orderNumber}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{order.customerName || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-500">{ORDER_TYPE_LABEL[order.orderType]}</td>
+                        <td className="px-4 py-3 text-sm font-mono font-medium text-gray-900 dark:text-white">{order.orderNumber}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{order.customerName || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{ORDER_TYPE_LABEL[order.orderType]}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status]}`}>
                             {getStatusLabel(order.status, order.orderType)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{Math.round(Number(order.totalAmount)).toLocaleString()} RWF</td>
-                        <td className="px-4 py-3 text-sm text-gray-500">{format(new Date(order.createdAt), 'MMM dd, HH:mm')}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{Math.round(Number(order.totalAmount)).toLocaleString()} RWF</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{format(new Date(order.createdAt), 'MMM dd, HH:mm')}</td>
                         <td className="px-4 py-3 text-right">
                           <button
                             onClick={(e) => { e.stopPropagation(); setDetailOrder(detailOrder?.id === order.id ? null : order) }}
-                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            className="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 transition-colors"
                             title="View details"
                           >
                             <Eye className="h-4 w-4" />
@@ -316,20 +316,20 @@ export default function OrdersPage() {
                 </table>
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                    <p className="text-sm text-gray-500">Page {page} of {totalPages}</p>
+                  <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Page {page} of {totalPages}</p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                        className="p-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="p-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                        className="p-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </button>
@@ -344,72 +344,72 @@ export default function OrdersPage() {
         {/* Order Detail Panel */}
         {detailOrder && (
           <div className="w-80 shrink-0">
-            <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-gray-900">Order Details</h2>
-                <button onClick={() => setDetailOrder(null)} className="text-gray-400 hover:text-gray-600">
+                <h2 className="font-semibold text-gray-900 dark:text-white">Order Details</h2>
+                <button onClick={() => setDetailOrder(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="space-y-3 text-sm mb-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Order #</span>
-                  <span className="font-mono font-medium">{detailOrder.orderNumber}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Order #</span>
+                  <span className="font-mono font-medium dark:text-white">{detailOrder.orderNumber}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Type</span>
-                  <span>{ORDER_TYPE_LABEL[detailOrder.orderType]}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Type</span>
+                  <span className="dark:text-gray-300">{ORDER_TYPE_LABEL[detailOrder.orderType]}</span>
                 </div>
                 {detailOrder.table && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Table</span>
-                    <span>{detailOrder.table.number}{detailOrder.table.location ? ` · ${detailOrder.table.location}` : ''}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Table</span>
+                    <span className="dark:text-gray-300">{detailOrder.table.number}{detailOrder.table.location ? ` · ${detailOrder.table.location}` : ''}</span>
                   </div>
                 )}
                 {detailOrder.customerName && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Customer</span>
-                    <span>{detailOrder.customerName}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Customer</span>
+                    <span className="dark:text-gray-300">{detailOrder.customerName}</span>
                   </div>
                 )}
                 {detailOrder.customerPhone && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Phone</span>
-                    <span>{detailOrder.customerPhone}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Phone</span>
+                    <span className="dark:text-gray-300">{detailOrder.customerPhone}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Status</span>
+                  <span className="text-gray-500 dark:text-gray-400">Status</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[detailOrder.status]}`}>
                     {getStatusLabel(detailOrder.status, detailOrder.orderType)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Created</span>
-                  <span>{format(new Date(detailOrder.createdAt), 'MMM dd, HH:mm')}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Created</span>
+                  <span className="dark:text-gray-300">{format(new Date(detailOrder.createdAt), 'MMM dd, HH:mm')}</span>
                 </div>
               </div>
 
               {/* Items */}
-              <div className="border-t border-gray-100 pt-3 mb-4">
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Items</p>
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mb-4">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Items</p>
                 <div className="space-y-2">
                   {detailOrder.orderItems.map((item, i) => (
                     <div key={i} className="flex justify-between text-sm">
-                      <span className="text-gray-700">{item.menuItem?.name ?? 'Item'} × {item.quantity}</span>
-                      <span className="font-medium">{Math.round(Number(item.price) * item.quantity).toLocaleString()} RWF</span>
+                      <span className="text-gray-700 dark:text-gray-300">{item.menuItem?.name ?? 'Item'} × {item.quantity}</span>
+                      <span className="font-medium dark:text-white">{Math.round(Number(item.price) * item.quantity).toLocaleString()} RWF</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between font-semibold text-sm border-t border-gray-100 pt-2 mt-2">
-                  <span>Total</span>
-                  <span>{Math.round(Number(detailOrder.totalAmount)).toLocaleString()} RWF</span>
+                <div className="flex justify-between font-semibold text-sm border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+                  <span className="dark:text-white">Total</span>
+                  <span className="dark:text-white">{Math.round(Number(detailOrder.totalAmount)).toLocaleString()} RWF</span>
                 </div>
               </div>
 
               {detailOrder.notes && (
-                <div className="bg-yellow-50 rounded p-2 mb-4 text-xs text-yellow-800">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded p-2 mb-4 text-xs text-yellow-800 dark:text-yellow-300">
                   <span className="font-medium">Notes: </span>{detailOrder.notes}
                 </div>
               )}
@@ -417,7 +417,7 @@ export default function OrdersPage() {
               {/* Status Actions */}
               {STATUS_TRANSITIONS[detailOrder.status].length > 0 && (canManage || detailOrder.status !== 'CANCELLED') && (
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Update Status</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Update Status</p>
                   {STATUS_TRANSITIONS[detailOrder.status].map((nextStatus) => (
                     <button
                       key={nextStatus}
@@ -425,7 +425,7 @@ export default function OrdersPage() {
                       disabled={updatingStatus}
                       className={`w-full py-1.5 px-3 rounded text-sm font-medium transition-colors disabled:opacity-50 ${
                         nextStatus === 'CANCELLED'
-                          ? 'border border-red-300 text-red-600 hover:bg-red-50'
+                          ? 'border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                           : 'bg-indigo-600 text-white hover:bg-indigo-700'
                       }`}
                     >
@@ -442,22 +442,22 @@ export default function OrdersPage() {
       {/* Create Order Modal */}
       {createOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 shrink-0 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">New Order</h2>
-              <button onClick={() => setCreateOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">New Order</h2>
+              <button onClick={() => setCreateOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="flex flex-1 overflow-hidden">
               {/* Menu Selection */}
-              <div className="flex-1 border-r border-gray-200 overflow-y-auto p-4">
-                <p className="text-sm font-medium text-gray-700 mb-3">Select Menu Items</p>
+              <div className="flex-1 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-4">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Menu Items</p>
                 <select
                   value={menuFilterCat}
                   onChange={(e) => setMenuFilterCat(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Categories</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -467,11 +467,11 @@ export default function OrdersPage() {
                     <button
                       key={item.id}
                       onClick={() => addItemToOrder(item)}
-                      className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors text-left"
+                      className="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left"
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                        <p className="text-xs text-gray-500">{item.category?.name}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{item.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.category?.name}</p>
                       </div>
                       <span className="text-sm font-semibold text-indigo-600">{Math.round(Number(item.price)).toLocaleString()} RWF</span>
                     </button>
@@ -482,22 +482,22 @@ export default function OrdersPage() {
               {/* Order Summary & Details */}
               <div className="w-72 shrink-0 flex flex-col overflow-hidden">
                 {/* Order Items */}
-                <div className="flex-1 overflow-y-auto p-4 border-b border-gray-200">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Order Items</p>
+                <div className="flex-1 overflow-y-auto p-4 border-b border-gray-200 dark:border-gray-700">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Order Items</p>
                   {newOrder.items.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-4">No items added yet.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No items added yet.</p>
                   ) : (
                     <div className="space-y-2">
                       {newOrder.items.map((item) => (
                         <div key={item.menuItemId} className="flex items-center gap-2 text-sm">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                            <p className="text-xs text-gray-500">{Math.round(item.price).toLocaleString()} RWF each</p>
+                            <p className="font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{Math.round(item.price).toLocaleString()} RWF each</p>
                           </div>
                           <div className="flex items-center gap-1">
-                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity - 1)} className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100">−</button>
-                            <span className="w-6 text-center text-xs font-medium">{item.quantity}</span>
-                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity + 1)} className="w-5 h-5 rounded border border-gray-300 flex items-center justify-center text-xs hover:bg-gray-100">+</button>
+                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity - 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">−</button>
+                            <span className="w-6 text-center text-xs font-medium dark:text-white">{item.quantity}</span>
+                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity + 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">+</button>
                             <button onClick={() => updateItemQty(item.menuItemId, 0)} className="text-red-400 hover:text-red-600 ml-1">
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -507,9 +507,9 @@ export default function OrdersPage() {
                     </div>
                   )}
                   {newOrder.items.length > 0 && (
-                    <div className="flex justify-between font-semibold text-sm border-t border-gray-100 pt-2 mt-3">
-                      <span>Total</span>
-                      <span>{Math.round(orderTotal).toLocaleString()} RWF</span>
+                    <div className="flex justify-between font-semibold text-sm border-t border-gray-100 dark:border-gray-700 pt-2 mt-3">
+                      <span className="dark:text-white">Total</span>
+                      <span className="dark:text-white">{Math.round(orderTotal).toLocaleString()} RWF</span>
                     </div>
                   )}
                 </div>
@@ -517,11 +517,11 @@ export default function OrdersPage() {
                 {/* Order Details Form */}
                 <div className="p-4 space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Order Type</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Order Type</label>
                     <select
                       value={newOrder.orderType}
                       onChange={(e) => setNewOrder({ ...newOrder, orderType: e.target.value as OrderType })}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="DINE_IN">Dine In</option>
                       <option value="TAKEAWAY">Takeaway</option>
@@ -530,11 +530,11 @@ export default function OrdersPage() {
                   </div>
                   {newOrder.orderType === 'DINE_IN' && (
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Table</label>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Table</label>
                       <select
                         value={newOrder.tableId}
                         onChange={(e) => setNewOrder({ ...newOrder, tableId: e.target.value })}
-                        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       >
                         <option value="">No table / Walk-in</option>
                         {availableTables.map((t) => (
@@ -544,31 +544,31 @@ export default function OrdersPage() {
                         ))}
                       </select>
                       {availableTables.length === 0 && (
-                        <p className="text-xs text-amber-600 mt-1">No available tables right now.</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">No available tables right now.</p>
                       )}
                     </div>
                   )}
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Customer Name</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Customer Name</label>
                     <input
                       type="text"
                       value={newOrder.customerName}
                       onChange={(e) => setNewOrder({ ...newOrder, customerName: e.target.value })}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="Optional"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
                     <textarea
                       value={newOrder.notes}
                       onChange={(e) => setNewOrder({ ...newOrder, notes: e.target.value })}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                       placeholder="Special instructions…"
                       rows={2}
                     />
                   </div>
-                  {createError && <p className="text-xs text-red-600">{createError}</p>}
+                  {createError && <p className="text-xs text-red-600 dark:text-red-400">{createError}</p>}
                   <button
                     onClick={handleCreate}
                     disabled={creating || newOrder.items.length === 0}

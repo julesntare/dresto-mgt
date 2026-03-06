@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, type ReactNode } from "react";
 import { useAuth } from "../lib/auth-context";
+import { useTheme } from "../lib/theme-context";
 import { ordersApi } from "../lib/api";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -50,9 +51,13 @@ const ORDER_TYPE_LABELS: Record<string, string> = {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [stats, setStats] = useState<OrderStats | null>(null);
   const [dailySales, setDailySales] = useState<DailySales[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const gridColor = theme === "dark" ? "#374151" : "#f0f0f0";
+  const tickColor = theme === "dark" ? "#9ca3af" : "#6b7280";
 
   const formattedDailySales = useMemo(() =>
     dailySales.map((s) => ({
@@ -99,7 +104,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900" />
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 dark:border-gray-100" />
       </div>
     );
   }
@@ -108,10 +113,10 @@ export default function Dashboard() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Welcome back, {user?.name}
         </h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
           Here's what's happening with your restaurant today.
         </p>
       </div>
@@ -122,33 +127,33 @@ export default function Dashboard() {
           label="Total Orders"
           value={String(stats?.totalOrders ?? 0)}
           icon={<ShoppingBag className="h-5 w-5 text-indigo-600" />}
-          bg="bg-indigo-50"
+          bg="bg-indigo-50 dark:bg-indigo-900/30"
         />
         <KpiCard
           label="Active"
           value={String(Math.max(0, activeOrders))}
           icon={<Clock className="h-5 w-5 text-amber-600" />}
-          bg="bg-amber-50"
+          bg="bg-amber-50 dark:bg-amber-900/30"
           sub="In progress"
         />
         <KpiCard
           label="Completed"
           value={String(stats?.completedOrders ?? 0)}
           icon={<CheckCircle className="h-5 w-5 text-green-600" />}
-          bg="bg-green-50"
+          bg="bg-green-50 dark:bg-green-900/30"
         />
         <KpiCard
           label="Cancelled"
           value={String(stats?.cancelledOrders ?? 0)}
           icon={<XCircle className="h-5 w-5 text-red-500" />}
-          bg="bg-red-50"
+          bg="bg-red-50 dark:bg-red-900/30"
         />
         {isManager && (
           <KpiCard
             label="Total Revenue"
             value={formatCurrency(stats?.totalRevenue ?? 0)}
             icon={<DollarSign className="h-5 w-5 text-blue-600" />}
-            bg="bg-blue-50"
+            bg="bg-blue-50 dark:bg-blue-900/30"
           />
         )}
         {isManager && (
@@ -156,7 +161,7 @@ export default function Dashboard() {
             label="Avg Order"
             value={formatCurrency(stats?.averageOrderValue ?? 0)}
             icon={<TrendingUp className="h-5 w-5 text-purple-600" />}
-            bg="bg-purple-50"
+            bg="bg-purple-50 dark:bg-purple-900/30"
             sub="Per completed"
           />
         )}
@@ -166,8 +171,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Revenue Chart - spans 2 cols for managers */}
         {isManager ? (
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
               Revenue — Last 7 Days
             </h2>
             {formattedDailySales.length === 0 ? (
@@ -176,10 +181,10 @@ export default function Dashboard() {
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: tickColor }} />
                     <YAxis
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: tickColor }}
                       tickFormatter={(v) => `${Math.round(v / 1000)}k`}
                     />
                     <Tooltip formatter={(v: number) => [formatCurrency(v), "Revenue"]} />
@@ -191,8 +196,8 @@ export default function Dashboard() {
           </div>
         ) : (
           /* Order Volume for staff (no revenue) */
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
               Order Volume — Last 7 Days
             </h2>
             {formattedDailySales.length === 0 ? (
@@ -201,9 +206,9 @@ export default function Dashboard() {
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: tickColor }} />
+                    <YAxis tick={{ fontSize: 11, fill: tickColor }} allowDecimals={false} />
                     <Tooltip formatter={(v: number) => [v, "Orders"]} />
                     <Bar dataKey="order_count" fill="#22c55e" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -214,8 +219,8 @@ export default function Dashboard() {
         )}
 
         {/* Order Type Donut */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Order Types</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Order Types</h2>
           {orderTypeData.length === 0 ? (
             <EmptyState label="No data" />
           ) : (
@@ -236,7 +241,7 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Legend
-                    formatter={(v) => <span className="text-xs text-gray-600">{v}</span>}
+                    formatter={(v) => <span className="text-xs text-gray-600 dark:text-gray-400">{v}</span>}
                   />
                   <Tooltip
                     formatter={(v: number, _name, props) => [
@@ -257,8 +262,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Order Volume (for managers — alongside revenue chart above) */}
         {isManager && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
               Order Volume — Last 7 Days
             </h2>
             {formattedDailySales.length === 0 ? (
@@ -267,9 +272,9 @@ export default function Dashboard() {
               <div className="h-52">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={formattedDailySales} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: tickColor }} />
+                    <YAxis tick={{ fontSize: 11, fill: tickColor }} allowDecimals={false} />
                     <Tooltip formatter={(v: number) => [v, "Orders"]} />
                     <Bar dataKey="order_count" fill="#22c55e" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -280,8 +285,8 @@ export default function Dashboard() {
         )}
 
         {/* Top Items */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Top Items</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Top Items</h2>
           {!stats?.popularItems?.length ? (
             <EmptyState label="No items data" />
           ) : (
@@ -296,23 +301,23 @@ export default function Dashboard() {
                   <div key={item.menuItemId}>
                     <div className="flex justify-between text-sm mb-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gray-400 w-4">
+                        <span className="text-xs font-bold text-gray-400 dark:text-gray-500 w-4">
                           #{i + 1}
                         </span>
-                        <span className="font-medium text-gray-800">
+                        <span className="font-medium text-gray-800 dark:text-gray-200">
                           {item.menuItem.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-right">
-                        <span className="text-gray-500">{item._sum.quantity} sold</span>
+                        <span className="text-gray-500 dark:text-gray-400">{item._sum.quantity} sold</span>
                         {isManager && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             {formatCurrency(revenue)}
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full bg-indigo-500"
                         style={{ width: `${pct}%` }}
@@ -327,8 +332,8 @@ export default function Dashboard() {
       </div>
 
       {/* Performance Summary */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
           Performance Summary
         </h2>
         <div className={`grid gap-6 ${isManager ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2"}`}>
@@ -373,13 +378,13 @@ function KpiCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
       <div className="flex items-center gap-2 mb-2">
         <div className={`p-1.5 rounded-lg ${bg}`}>{icon}</div>
       </div>
-      <p className="text-xl font-bold text-gray-900 leading-tight">{value}</p>
-      <p className="text-sm text-gray-500 mt-0.5">{label}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+      <p className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
+      {sub && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -395,7 +400,7 @@ function MetricRow({
   const isGood = invertGood ? !good : good;
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
       <p className={`text-xl font-bold ${isGood ? "text-green-600" : "text-red-500"}`}>
         {value}
       </p>
@@ -405,7 +410,7 @@ function MetricRow({
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center h-40 text-gray-400">
+    <div className="flex items-center justify-center h-40 text-gray-400 dark:text-gray-500">
       <p className="text-sm">{label}</p>
     </div>
   );

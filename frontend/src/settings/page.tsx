@@ -63,54 +63,54 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1 text-sm">Manage your account preferences</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Manage your account preferences</p>
       </div>
 
       {/* Profile Section */}
-      <div className="bg-white rounded-lg shadow-sm mb-6">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
             <User className="h-5 w-5 text-indigo-600" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Profile</h2>
-            <p className="text-xs text-gray-500">Update your display name</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profile</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Update your display name</p>
           </div>
         </div>
         <form onSubmit={handleProfileSave} className="px-6 py-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input
               type="email"
               value={user?.email ?? ''}
               disabled
-              className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+              className="w-full border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             />
-            <p className="text-xs text-gray-400 mt-1">Email cannot be changed.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed.</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
             <input
               type="text"
               value={user?.role ?? ''}
               disabled
-              className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm bg-gray-50 text-gray-500 cursor-not-allowed"
+              className="w-full border border-gray-200 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 cursor-not-allowed"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Your full name"
             />
           </div>
-          {profileError && <p className="text-sm text-red-600">{profileError}</p>}
+          {profileError && <p className="text-sm text-red-600 dark:text-red-400">{profileError}</p>}
           {profileSuccess && (
-            <div className="flex items-center gap-2 text-green-600 text-sm">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
               <CheckCircle className="h-4 w-4" />
               Profile updated successfully.
             </div>
@@ -128,50 +128,50 @@ export default function SettingsPage() {
       </div>
 
       {/* Password Section */}
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-          <div className="p-2 bg-orange-50 rounded-lg">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+          <div className="p-2 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
             <Lock className="h-5 w-5 text-orange-600" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Change Password</h2>
-            <p className="text-xs text-gray-500">Update your account password</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Change Password</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Update your account password</p>
           </div>
         </div>
         <form onSubmit={handlePasswordSave} className="px-6 py-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current Password <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password <span className="text-red-500">*</span></label>
             <input
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter current password"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New Password <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password <span className="text-red-500">*</span></label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Min. 6 characters"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password <span className="text-red-500">*</span></label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Repeat new password"
             />
           </div>
-          {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
+          {passwordError && <p className="text-sm text-red-600 dark:text-red-400">{passwordError}</p>}
           {passwordSuccess && (
-            <div className="flex items-center gap-2 text-green-600 text-sm">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
               <CheckCircle className="h-4 w-4" />
               Password changed successfully.
             </div>
