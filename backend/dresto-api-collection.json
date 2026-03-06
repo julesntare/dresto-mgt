@@ -437,6 +437,24 @@
           }
         },
         {
+          "name": "Submit Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Use this OR X-Order-Token, not both" },
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative to Bearer auth — use the accessToken returned when the order was created", "disabled": true }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Customer or guest submits a MoMo/payment transaction ID for staff to verify. Sets paymentStatus → PENDING_VERIFICATION. Auth: Bearer token (any role, customers restricted to own orders) OR X-Order-Token header matching the order's accessToken. provider is optional."
+          }
+        },
+        {
           "name": "Cancel Order",
           "request": {
             "method": "PATCH",
@@ -696,6 +714,23 @@
             },
             "description": "Public — no auth required. Returns ALL orders placed with this guestSessionToken. The mobile app generates this UUID once (on install or per session) and reuses it across orders. Multiple customers at the same table each have their own UUID."
           }
+        },
+        {
+          "name": "7. Submit Payment (Guest)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Guest submits payment transaction ID using X-Order-Token (the accessToken auto-saved from step 4). No Bearer auth needed. Sets paymentStatus → PENDING_VERIFICATION."
+          }
         }
       ]
     },
@@ -822,7 +857,24 @@
           }
         },
         {
-          "name": "7. Cancel Own Order",
+          "name": "7. Submit Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Authenticated customer submits a payment transaction ID for their own order. Sets paymentStatus → PENDING_VERIFICATION. Returns 403 if order belongs to another user."
+          }
+        },
+        {
+          "name": "8. Cancel Own Order",
           "request": {
             "method": "PATCH",
             "header": [

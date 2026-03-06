@@ -908,6 +908,121 @@ router.put(
   }
 );
 
+/**
+ * @swagger
+ * /orders/{id}/payment:
+ *   post:
+ *     summary: Submit payment transaction ID for an order
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *       - orderToken: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: header
+ *         name: X-Order-Token
+ *         schema:
+ *           type: string
+ *         description: Guest order access token (alternative to Bearer auth)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - transactionId
+ *             properties:
+ *               transactionId:
+ *                 type: string
+ *               provider:
+ *                 type: string
+ *                 example: MTN_MOMO
+ *     responses:
+ *       200:
+ *         description: Payment recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Invalid request or order already paid
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Order not found
+ */
+
+// Submit payment transaction ID (guest via X-Order-Token or authenticated user)
+router.post("/:id/payment", optionalAuthenticateToken, (async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { transactionId, provider } = req.body;
+
+    if (!transactionId || typeof transactionId !== "string" || !transactionId.trim()) {
+      return res.status(400).json({ message: "transactionId is required" });
+    }
+
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Authorization: authenticated user OR matching X-Order-Token header
+    if (!req.user) {
+      const orderToken = req.headers["x-order-token"] as string | undefined;
+      if (!orderToken || orderToken !== order.accessToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    } else if (req.user.role === "CUSTOMER" && order.userId !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    if (order.paymentStatus === "PAID") {
+      return res.status(400).json({ message: "Order is already paid" });
+    }
+
+    if (["CANCELLED"].includes(order.status)) {
+      return res.status(400).json({ message: "Cannot pay for a cancelled order" });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: {
+        transactionId: transactionId.trim(),
+        paymentStatus: "PENDING_VERIFICATION",
+        paymentProvider: provider || null,
+      },
+      include: {
+        orderItems: {
+          include: {
+            menuItem: {
+              select: { id: true, name: true, price: true },
+            },
+          },
+        },
+        table: {
+          select: { id: true, number: true, location: true },
+        },
+      },
+    });
+
+    res.json({ message: "Payment recorded", order: updatedOrder });
+  } catch (error) {
+    console.error("Payment recording error:", error);
+    res.status(500).json({ message: "Failed to record payment" });
+  }
+}) as RequestHandler);
+
 // Cancel order
 router.patch("/:id/cancel", authenticateToken, (async (req, res) => {
   try {

@@ -84,6 +84,10 @@ model Order {
     tableId           String?
     notes             String?
     userId            String?
+    transactionId     String?
+    paymentStatus     PaymentStatus @default(UNPAID)
+    paymentProvider   String?
+    paidAt            DateTime?
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
 
@@ -136,4 +140,10 @@ enum TableStatus {
     AVAILABLE
     OCCUPIED
     RESERVED
+}
+
+enum PaymentStatus {
+    UNPAID
+    PENDING_VERIFICATION
+    PAID
 }
