@@ -388,6 +388,22 @@ export const ordersApi = {
     });
     return response.data;
   },
+
+  recordPayment: async (id: string, transactionId: string, provider?: string) => {
+    const response = await api.post<{ message: string; order: Order }>(
+      `/orders/${id}/payment`,
+      { transactionId, provider }
+    );
+    return response.data;
+  },
+
+  confirmPayment: async (id: string) => {
+    const response = await api.patch<{ message: string; order: Order }>(
+      `/orders/${id}/payment/confirm`,
+      {}
+    );
+    return response.data;
+  },
 };
 
 // Tables API

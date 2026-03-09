@@ -1023,6 +1023,31 @@ router.post("/:id/payment", optionalAuthenticateToken, (async (req, res) => {
   }
 }) as RequestHandler);
 
+// Confirm payment (Admin/Manager only) — marks order as PAID
+router.patch("/:id/payment/confirm", authenticateToken, requireRole(["ADMIN", "MANAGER", "STAFF"]), (async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.paymentStatus === "PAID") return res.status(400).json({ message: "Order is already paid" });
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { paymentStatus: "PAID", paidAt: new Date() },
+      include: {
+        orderItems: { include: { menuItem: { select: { id: true, name: true, price: true } } } },
+        table: { select: { id: true, number: true, location: true } },
+      },
+    });
+
+    res.json({ message: "Payment confirmed", order: updatedOrder });
+  } catch (error) {
+    console.error("Payment confirm error:", error);
+    res.status(500).json({ message: "Failed to confirm payment" });
+  }
+}) as RequestHandler);
+
 // Cancel order
 router.patch("/:id/cancel", authenticateToken, (async (req, res) => {
   try {

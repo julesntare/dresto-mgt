@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 
 type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED'
 type OrderType = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'
+type PaymentStatus = 'UNPAID' | 'PENDING_VERIFICATION' | 'PAID'
 
 interface OrderItem {
   menuItemId: string
@@ -30,6 +31,10 @@ interface Order {
   updatedAt: string
   orderItems: OrderItem[]
   user?: { id: string; name: string; email: string }
+  paymentStatus: PaymentStatus
+  transactionId?: string
+  paymentProvider?: string
+  paidAt?: string
 }
 
 interface MenuItem { id: string; name: string; price: number; isAvailable: boolean; category?: { name: string } }
@@ -42,6 +47,18 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
   READY: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   DELIVERED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
   CANCELLED: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+}
+
+const PAYMENT_STATUS_COLORS: Record<PaymentStatus, string> = {
+  UNPAID: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  PENDING_VERIFICATION: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+  PAID: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+}
+
+const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  UNPAID: 'Unpaid',
+  PENDING_VERIFICATION: 'Pending',
+  PAID: 'Paid',
 }
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
@@ -90,6 +107,12 @@ export default function OrdersPage() {
   // Detail panel
   const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+
+  // Payment
+  const [paymentRef, setPaymentRef] = useState('')
+  const [paymentProvider, setPaymentProvider] = useState('')
+  const [recordingPayment, setRecordingPayment] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
 
   // Create order modal
   const [createOpen, setCreateOpen] = useState(false)
@@ -182,6 +205,38 @@ export default function OrdersPage() {
       setCreateError(err instanceof Error ? err.message : 'Failed to create order.')
     } finally {
       setCreating(false)
+    }
+  }
+
+  const handleRecordPayment = async () => {
+    if (!detailOrder || !paymentRef.trim()) return
+    setRecordingPayment(true)
+    setPaymentError(null)
+    try {
+      const { order } = await ordersApi.recordPayment(detailOrder.id, paymentRef.trim(), paymentProvider.trim() || undefined)
+      setDetailOrder({ ...detailOrder, ...order })
+      setPaymentRef('')
+      setPaymentProvider('')
+      await fetchOrders()
+    } catch {
+      setPaymentError('Failed to record payment.')
+    } finally {
+      setRecordingPayment(false)
+    }
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!detailOrder) return
+    setRecordingPayment(true)
+    setPaymentError(null)
+    try {
+      const { order } = await ordersApi.confirmPayment(detailOrder.id)
+      setDetailOrder({ ...detailOrder, ...order })
+      await fetchOrders()
+    } catch {
+      setPaymentError('Failed to confirm payment.')
+    } finally {
+      setRecordingPayment(false)
     }
   }
 
@@ -289,7 +344,7 @@ export default function OrdersPage() {
                       <tr
                         key={order.id}
                         className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors ${detailOrder?.id === order.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}
-                        onClick={() => setDetailOrder(detailOrder?.id === order.id ? null : order)}
+                        onClick={() => { setDetailOrder(detailOrder?.id === order.id ? null : order); setPaymentRef(''); setPaymentProvider(''); setPaymentError(null) }}
                       >
                         <td className="px-4 py-3 text-sm font-mono font-medium text-gray-900 dark:text-white">{order.orderNumber}</td>
                         <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{order.customerName || '—'}</td>
@@ -389,6 +444,30 @@ export default function OrdersPage() {
                   <span className="text-gray-500 dark:text-gray-400">Created</span>
                   <span className="dark:text-gray-300">{format(new Date(detailOrder.createdAt), 'MMM dd, HH:mm')}</span>
                 </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 dark:text-gray-400">Payment</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${PAYMENT_STATUS_COLORS[detailOrder.paymentStatus ?? 'UNPAID']}`}>
+                    {PAYMENT_STATUS_LABEL[detailOrder.paymentStatus ?? 'UNPAID']}
+                  </span>
+                </div>
+                {detailOrder.transactionId && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Ref #</span>
+                    <span className="font-mono text-xs dark:text-gray-300">{detailOrder.transactionId}</span>
+                  </div>
+                )}
+                {detailOrder.paymentProvider && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Provider</span>
+                    <span className="dark:text-gray-300">{detailOrder.paymentProvider}</span>
+                  </div>
+                )}
+                {detailOrder.paidAt && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Paid at</span>
+                    <span className="dark:text-gray-300">{format(new Date(detailOrder.paidAt), 'MMM dd, HH:mm')}</span>
+                  </div>
+                )}
               </div>
 
               {/* Items */}
@@ -411,6 +490,51 @@ export default function OrdersPage() {
               {detailOrder.notes && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded p-2 mb-4 text-xs text-yellow-800 dark:text-yellow-300">
                   <span className="font-medium">Notes: </span>{detailOrder.notes}
+                </div>
+              )}
+
+              {/* Payment Actions */}
+              {detailOrder.status !== 'CANCELLED' && detailOrder.paymentStatus !== 'PAID' && (
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mb-4 space-y-2">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment</p>
+
+                  {detailOrder.paymentStatus === 'UNPAID' && (
+                    <>
+                      <input
+                        type="text"
+                        value={paymentRef}
+                        onChange={(e) => setPaymentRef(e.target.value)}
+                        placeholder="Reference / Transaction ID"
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <input
+                        type="text"
+                        value={paymentProvider}
+                        onChange={(e) => setPaymentProvider(e.target.value)}
+                        placeholder="Provider (e.g. MTN MoMo)"
+                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <button
+                        onClick={handleRecordPayment}
+                        disabled={recordingPayment || !paymentRef.trim()}
+                        className="w-full py-1.5 px-3 rounded text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                      >
+                        {recordingPayment ? 'Saving…' : 'Record Payment'}
+                      </button>
+                    </>
+                  )}
+
+                  {detailOrder.paymentStatus === 'PENDING_VERIFICATION' && (
+                    <button
+                      onClick={handleConfirmPayment}
+                      disabled={recordingPayment}
+                      className="w-full py-1.5 px-3 rounded text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+                    >
+                      {recordingPayment ? 'Confirming…' : 'Confirm Payment Received'}
+                    </button>
+                  )}
+
+                  {paymentError && <p className="text-xs text-red-600 dark:text-red-400">{paymentError}</p>}
                 </div>
               )}
 
