@@ -1049,26 +1049,38 @@ router.patch("/:id/payment/confirm", authenticateToken, requireRole(["ADMIN", "M
 }) as RequestHandler);
 
 // Cancel order
-router.patch("/:id/cancel", authenticateToken, (async (req, res) => {
+router.patch("/:id/cancel", optionalAuthenticateToken, (async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const order = await prisma.order.findUnique({
-      where: { id },
-    });
+    const order = await prisma.order.findUnique({ where: { id } });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Customers can only cancel their own orders
-    if (req.user!.role === "CUSTOMER" && order.userId !== req.user!.id) {
+    // Authorization: authenticated staff/admin/manager can cancel any order.
+    // Authenticated customer can only cancel their own order.
+    // Unauthenticated guest must provide matching X-Order-Token.
+    if (!req.user) {
+      const orderToken = req.headers["x-order-token"] as string | undefined;
+      if (!orderToken || orderToken !== order.accessToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    } else if (req.user.role === "CUSTOMER" && order.userId !== req.user.id) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
     if (["DELIVERED", "CANCELLED"].includes(order.status)) {
       return res.status(400).json({ message: "Cannot cancel this order" });
+    }
+
+    // Guests and customers can only cancel before kitchen starts preparing
+    const isGuest = !req.user;
+    const isCustomer = req.user?.role === "CUSTOMER";
+    if ((isGuest || isCustomer) && !["PENDING", "CONFIRMED"].includes(order.status)) {
+      return res.status(403).json({ message: "Order cannot be cancelled once preparation has started" });
     }
 
     const updatedOrder = await prisma.order.update({
