@@ -44,6 +44,7 @@ model MenuItem {
     price       Decimal  @db.Decimal(10, 2)
     image       String?
     isAvailable Boolean  @default(true)
+    ingredients String[]
     categoryId  String
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
@@ -100,12 +101,13 @@ model Order {
 }
 
 model OrderItem {
-    id         String   @id @default(cuid())
-    quantity   Int
-    price      Decimal  @db.Decimal(10, 2)
-    orderId    String
-    menuItemId String
-    createdAt  DateTime @default(now())
+    id                  String   @id @default(cuid())
+    quantity            Int
+    price               Decimal  @db.Decimal(10, 2)
+    excludedIngredients String[]
+    orderId             String
+    menuItemId          String
+    createdAt           DateTime @default(now())
 
     // Relations
     order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)

@@ -13,6 +13,7 @@ interface OrderItem {
   menuItemId: string
   quantity: number
   price: number
+  excludedIngredients?: string[]
   menuItem?: { id: string; name: string; price: number; image?: string }
 }
 
@@ -37,7 +38,7 @@ interface Order {
   paidAt?: string
 }
 
-interface MenuItem { id: string; name: string; price: number; isAvailable: boolean; category?: { name: string } }
+interface MenuItem { id: string; name: string; price: number; isAvailable: boolean; ingredients: string[]; category?: { name: string } }
 interface Category { id: string; name: string }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -81,7 +82,7 @@ const getStatusLabel = (status: OrderStatus, orderType: OrderType): string => {
   return status.charAt(0) + status.slice(1).toLowerCase()
 }
 
-interface NewOrderItem { menuItemId: string; quantity: number; name: string; price: number }
+interface NewOrderItem { menuItemId: string; quantity: number; name: string; price: number; ingredients: string[]; excludedIngredients: string[] }
 interface NewOrderForm {
   customerName: string
   customerPhone: string
@@ -172,8 +173,21 @@ export default function OrdersPage() {
       if (existing) {
         return { ...prev, items: prev.items.map((i) => i.menuItemId === item.id ? { ...i, quantity: i.quantity + 1 } : i) }
       }
-      return { ...prev, items: [...prev.items, { menuItemId: item.id, quantity: 1, name: item.name, price: item.price }] }
+      return { ...prev, items: [...prev.items, { menuItemId: item.id, quantity: 1, name: item.name, price: item.price, ingredients: item.ingredients ?? [], excludedIngredients: [] }] }
     })
+  }
+
+  const toggleExcludeIngredient = (menuItemId: string, ingredient: string) => {
+    setNewOrder((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => {
+        if (i.menuItemId !== menuItemId) return i
+        const excluded = i.excludedIngredients.includes(ingredient)
+          ? i.excludedIngredients.filter((e) => e !== ingredient)
+          : [...i.excludedIngredients, ingredient]
+        return { ...i, excludedIngredients: excluded }
+      }),
+    }))
   }
 
   const updateItemQty = (menuItemId: string, qty: number) => {
@@ -197,7 +211,7 @@ export default function OrdersPage() {
         orderType: newOrder.orderType,
         tableId: newOrder.tableId || undefined,
         notes: newOrder.notes.trim() || undefined,
-        items: newOrder.items.map((i) => ({ menuItemId: i.menuItemId, quantity: i.quantity })),
+        items: newOrder.items.map((i) => ({ menuItemId: i.menuItemId, quantity: i.quantity, excludedIngredients: i.excludedIngredients.length > 0 ? i.excludedIngredients : undefined })),
       })
       setCreateOpen(false)
       await fetchOrders()
@@ -475,9 +489,16 @@ export default function OrdersPage() {
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Items</p>
                 <div className="space-y-2">
                   {detailOrder.orderItems.map((item, i) => (
-                    <div key={i} className="flex justify-between text-sm">
-                      <span className="text-gray-700 dark:text-gray-300">{item.menuItem?.name ?? 'Item'} × {item.quantity}</span>
-                      <span className="font-medium dark:text-white">{Math.round(Number(item.price) * item.quantity).toLocaleString()} RWF</span>
+                    <div key={i} className="text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-700 dark:text-gray-300">{item.menuItem?.name ?? 'Item'} × {item.quantity}</span>
+                        <span className="font-medium dark:text-white">{Math.round(Number(item.price) * item.quantity).toLocaleString()} RWF</span>
+                      </div>
+                      {item.excludedIngredients && item.excludedIngredients.length > 0 && (
+                        <p className="text-xs text-red-500 dark:text-red-400 mt-0.5">
+                          No: {item.excludedIngredients.join(', ')}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -611,21 +632,41 @@ export default function OrdersPage() {
                   {newOrder.items.length === 0 ? (
                     <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No items added yet.</p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {newOrder.items.map((item) => (
-                        <div key={item.menuItemId} className="flex items-center gap-2 text-sm">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{Math.round(item.price).toLocaleString()} RWF each</p>
+                        <div key={item.menuItemId} className="text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{Math.round(item.price).toLocaleString()} RWF each</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => updateItemQty(item.menuItemId, item.quantity - 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">−</button>
+                              <span className="w-6 text-center text-xs font-medium dark:text-white">{item.quantity}</span>
+                              <button onClick={() => updateItemQty(item.menuItemId, item.quantity + 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">+</button>
+                              <button onClick={() => updateItemQty(item.menuItemId, 0)} className="text-red-400 hover:text-red-600 ml-1">
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity - 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">−</button>
-                            <span className="w-6 text-center text-xs font-medium dark:text-white">{item.quantity}</span>
-                            <button onClick={() => updateItemQty(item.menuItemId, item.quantity + 1)} className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center text-xs hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white">+</button>
-                            <button onClick={() => updateItemQty(item.menuItemId, 0)} className="text-red-400 hover:text-red-600 ml-1">
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          </div>
+                          {item.ingredients.length > 0 && (
+                            <div className="mt-1.5 pl-0.5">
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Exclude:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {item.ingredients.map((ing) => (
+                                  <label key={ing} className="flex items-center gap-1 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={item.excludedIngredients.includes(ing)}
+                                      onChange={() => toggleExcludeIngredient(item.menuItemId, ing)}
+                                      className="rounded border-gray-300 text-red-500 focus:ring-red-400 w-3 h-3"
+                                    />
+                                    <span className={`text-xs px-1.5 py-0.5 rounded ${item.excludedIngredients.includes(ing) ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 line-through' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>{ing}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

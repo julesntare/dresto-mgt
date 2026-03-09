@@ -8,6 +8,7 @@ interface MenuItem {
   categoryId: string;
   image?: string;
   isAvailable: boolean;
+  ingredients: string[];
   category?: {
     id: string;
     name: string;
@@ -21,12 +22,14 @@ interface CreateMenuItemData {
   categoryId: string;
   image?: string;
   isAvailable?: boolean;
+  ingredients?: string[];
 }
 
 interface OrderItem {
   menuItemId: string;
   quantity: number;
   price?: number;
+  excludedIngredients?: string[];
   menuItem?: {
     id: string;
     name: string;
@@ -69,7 +72,7 @@ interface CreateOrderData {
   orderType: "DINE_IN" | "TAKEAWAY" | "DELIVERY";
   tableId?: string;
   notes?: string;
-  items: { menuItemId: string; quantity: number }[];
+  items: { menuItemId: string; quantity: number; excludedIngredients?: string[] }[];
 }
 
 interface OrderFilters {

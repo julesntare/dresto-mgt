@@ -291,6 +291,7 @@ router.post(
         categoryId,
         image,
         isAvailable = true,
+        ingredients,
       } = req.body;
 
       // Verify category exists
@@ -310,6 +311,7 @@ router.post(
           categoryId,
           image,
           isAvailable,
+          ingredients: Array.isArray(ingredients) ? ingredients : [],
         },
         include: {
           category: {
@@ -339,7 +341,7 @@ router.put(
   (async (req, res) => {
     try {
       const { id } = req.params;
-      const { name, description, price, categoryId, image, isAvailable } =
+      const { name, description, price, categoryId, image, isAvailable, ingredients } =
         req.body;
 
       // Verify category exists if provided
@@ -362,6 +364,7 @@ router.put(
           categoryId,
           image,
           ...(isAvailable !== undefined && { isAvailable }),
+          ...(Array.isArray(ingredients) && { ingredients }),
         },
         include: {
           category: {

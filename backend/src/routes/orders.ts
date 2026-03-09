@@ -743,6 +743,7 @@ router.post(
           menuItemId: item.menuItemId,
           quantity: item.quantity,
           price: menuItem.price,
+          excludedIngredients: Array.isArray(item.excludedIngredients) ? item.excludedIngredients : [],
         };
       });
 

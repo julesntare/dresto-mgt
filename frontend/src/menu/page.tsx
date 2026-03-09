@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, KeyboardEvent } from 'react'
 import { menuApi, categoriesApi } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
-import { Plus, Edit2, Trash2, Search, UtensilsCrossed, ImageOff } from 'lucide-react'
+import { Plus, Edit2, Trash2, Search, UtensilsCrossed, ImageOff, X } from 'lucide-react'
 
 interface Category { id: string; name: string; isActive: boolean }
 interface MenuItem {
@@ -11,6 +11,7 @@ interface MenuItem {
   price: number
   image?: string
   isAvailable: boolean
+  ingredients: string[]
   categoryId: string
   category?: { id: string; name: string }
 }
@@ -21,9 +22,10 @@ interface FormData {
   categoryId: string
   image: string
   isAvailable: boolean
+  ingredients: string[]
 }
 
-const EMPTY_FORM: FormData = { name: '', description: '', price: '', categoryId: '', image: '', isAvailable: true }
+const EMPTY_FORM: FormData = { name: '', description: '', price: '', categoryId: '', image: '', isAvailable: true, ingredients: [] }
 
 export default function MenuPage() {
   const { user } = useAuth()
@@ -45,6 +47,8 @@ export default function MenuPage() {
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [ingredientInput, setIngredientInput] = useState('')
+  const ingredientInputRef = useRef<HTMLInputElement>(null)
 
   const canEdit = user?.role === 'ADMIN' || user?.role === 'MANAGER'
   const canDelete = user?.role === 'ADMIN'
@@ -74,6 +78,7 @@ export default function MenuPage() {
   const openCreate = () => {
     setEditingItem(null)
     setFormData(EMPTY_FORM)
+    setIngredientInput('')
     setFormError(null)
     setModalOpen(true)
   }
@@ -87,7 +92,9 @@ export default function MenuPage() {
       categoryId: item.categoryId,
       image: item.image ?? '',
       isAvailable: item.isAvailable,
+      ingredients: item.ingredients ?? [],
     })
+    setIngredientInput('')
     setFormError(null)
     setModalOpen(true)
   }
@@ -108,6 +115,7 @@ export default function MenuPage() {
         categoryId: formData.categoryId,
         image: formData.image.trim() || undefined,
         isAvailable: formData.isAvailable,
+        ingredients: formData.ingredients,
       }
       if (editingItem) {
         await menuApi.updateItem(editingItem.id, payload)
@@ -121,6 +129,27 @@ export default function MenuPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const addIngredient = (value: string) => {
+    const tag = value.trim()
+    if (tag && !formData.ingredients.includes(tag)) {
+      setFormData((prev) => ({ ...prev, ingredients: [...prev.ingredients, tag] }))
+    }
+    setIngredientInput('')
+  }
+
+  const handleIngredientKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addIngredient(ingredientInput)
+    } else if (e.key === 'Backspace' && !ingredientInput && formData.ingredients.length > 0) {
+      setFormData((prev) => ({ ...prev, ingredients: prev.ingredients.slice(0, -1) }))
+    }
+  }
+
+  const removeIngredient = (tag: string) => {
+    setFormData((prev) => ({ ...prev, ingredients: prev.ingredients.filter((i) => i !== tag) }))
   }
 
   const handleDelete = async () => {
@@ -225,6 +254,16 @@ export default function MenuPage() {
                 {item.description && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{item.description}</p>
                 )}
+                {item.ingredients?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {item.ingredients.slice(0, 4).map((ing) => (
+                      <span key={ing} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded">{ing}</span>
+                    ))}
+                    {item.ingredients.length > 4 && (
+                      <span className="text-xs text-gray-400 dark:text-gray-500 px-1">+{item.ingredients.length - 4} more</span>
+                    )}
+                  </div>
+                )}
                 <div className="mt-auto flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-400 dark:text-gray-500">{item.category?.name}</p>
@@ -314,6 +353,32 @@ export default function MenuPage() {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="https://…"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredients</label>
+                <div
+                  className="min-h-10 w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 flex flex-wrap gap-1.5 bg-white dark:bg-gray-700 focus-within:ring-2 focus-within:ring-indigo-500 cursor-text"
+                  onClick={() => ingredientInputRef.current?.focus()}
+                >
+                  {formData.ingredients.map((tag) => (
+                    <span key={tag} className="inline-flex items-center gap-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded-full">
+                      {tag}
+                      <button type="button" onClick={() => removeIngredient(tag)} className="hover:text-indigo-900 dark:hover:text-indigo-100">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    ref={ingredientInputRef}
+                    type="text"
+                    value={ingredientInput}
+                    onChange={(e) => setIngredientInput(e.target.value)}
+                    onKeyDown={handleIngredientKeyDown}
+                    onBlur={() => addIngredient(ingredientInput)}
+                    className="flex-1 min-w-24 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none py-0.5"
+                    placeholder={formData.ingredients.length === 0 ? 'Type and press Enter…' : ''}
+                  />
+                </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
