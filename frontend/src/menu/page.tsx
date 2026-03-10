@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, KeyboardEvent } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { menuApi, categoriesApi } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
 import { Plus, Edit2, Trash2, Search, UtensilsCrossed, ImageOff, X } from 'lucide-react'

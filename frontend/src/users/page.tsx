@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth-context'
 import { Plus, Edit2, Trash2, Users, ToggleLeft, ToggleRight, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 
-type Role = 'ADMIN' | 'MANAGER' | 'STAFF'
+type Role = 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER'
 
 interface User {
   id: string
@@ -36,6 +36,7 @@ const ROLE_COLORS: Record<Role, string> = {
   ADMIN: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   MANAGER: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   STAFF: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  CUSTOMER: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
 }
 
 export default function UsersPage() {

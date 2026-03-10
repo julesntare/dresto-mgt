@@ -28,7 +28,7 @@ interface CreateMenuItemData {
 interface OrderItem {
   menuItemId: string;
   quantity: number;
-  price?: number;
+  price: number;
   excludedIngredients?: string[];
   menuItem?: {
     id: string;
@@ -55,7 +55,7 @@ interface Order {
     | "READY"
     | "DELIVERED"
     | "CANCELLED";
-  userId: string;
+  userId?: string;
   createdAt: string;
   updatedAt: string;
   orderItems: OrderItem[];
@@ -64,6 +64,10 @@ interface Order {
     name: string;
     email: string;
   };
+  paymentStatus: 'UNPAID' | 'PENDING_VERIFICATION' | 'PAID';
+  transactionId?: string;
+  paymentProvider?: string;
+  paidAt?: string;
 }
 
 interface CreateOrderData {
@@ -295,6 +299,8 @@ export const categoriesApi = {
 };
 
 // Users API functions (Admin only)
+type UserRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER';
+
 export const usersApi = {
   getAll: async () => {
     const response = await api.get<{
@@ -303,7 +309,7 @@ export const usersApi = {
         email: string | null;
         phone: string | null;
         name: string;
-        role: string;
+        role: UserRole;
         isActive: boolean;
         createdAt: string;
         updatedAt: string;
@@ -313,13 +319,13 @@ export const usersApi = {
     return response.data;
   },
 
-  create: async (userData: { email?: string; phone?: string; password?: string; name: string; role?: string }) => {
-    const response = await api.post<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: string; isActive: boolean; createdAt: string } }>("/users", userData);
+  create: async (userData: { email?: string; phone?: string; password?: string; name: string; role?: UserRole }) => {
+    const response = await api.post<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: UserRole; isActive: boolean; createdAt: string } }>("/users", userData);
     return response.data;
   },
 
-  update: async (id: string, data: { name?: string; phone?: string; role?: string; isActive?: boolean }) => {
-    const response = await api.put<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: string; isActive: boolean } }>(`/users/${id}`, data);
+  update: async (id: string, data: { name?: string; phone?: string; role?: UserRole; isActive?: boolean }) => {
+    const response = await api.put<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: UserRole; isActive: boolean } }>(`/users/${id}`, data);
     return response.data;
   },
 
