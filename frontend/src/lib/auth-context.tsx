@@ -11,7 +11,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -57,9 +57,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     try {
-      const response = await authApi.login(email, password);
+      const response = await authApi.login(identifier, password);
       const { user, accessToken, refreshToken } = response;
 
       localStorage.setItem("accessToken", accessToken);
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const serverMsg = error.response?.data?.message;
-        if (status === 401) throw new Error("Incorrect email or password.");
+        if (status === 401) throw new Error("Incorrect email/phone or password.");
         if (status === 403) throw new Error("Your account is inactive. Contact an administrator.");
         if (status === 429) throw new Error("Too many attempts. Please wait and try again.");
         if (!error.response) throw new Error("Cannot reach the server. Check your connection.");
