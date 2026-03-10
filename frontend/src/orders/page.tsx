@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { ordersApi, menuApi, categoriesApi, tablesApi } from '../lib/api'
 import type { Table } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
-import { Plus, Eye, X, ChevronLeft, ChevronRight, ShoppingCart, Trash2 } from 'lucide-react'
+import { Plus, Eye, X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Send, MessageSquare } from 'lucide-react'
 import { format } from 'date-fns'
 
 type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'DELIVERED' | 'CANCELLED'
+
+interface OrderMessage {
+  id: string
+  orderId: string
+  content: string
+  senderType: 'CLIENT' | 'STAFF'
+  senderName: string | null
+  isRead: boolean
+  createdAt: string
+}
 type OrderType = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'
 type PaymentStatus = 'UNPAID' | 'PENDING_VERIFICATION' | 'PAID'
 
@@ -115,6 +125,13 @@ export default function OrdersPage() {
   const [recordingPayment, setRecordingPayment] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
 
+  // Messaging
+  const [messages, setMessages] = useState<OrderMessage[]>([])
+  const [messageInput, setMessageInput] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   // Create order modal
   const [createOpen, setCreateOpen] = useState(false)
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
@@ -128,6 +145,48 @@ export default function OrdersPage() {
   const [creating, setCreating] = useState(false)
 
   const canManage = user?.role === 'ADMIN' || user?.role === 'MANAGER'
+
+  const fetchMessages = useCallback(async (orderId: string) => {
+    try {
+      const data = await ordersApi.getMessages(orderId)
+      setMessages(data.messages)
+    } catch {
+      // silently fail on poll
+    }
+  }, [])
+
+  // Start/stop polling when selected order changes
+  useEffect(() => {
+    if (pollRef.current) clearInterval(pollRef.current)
+    if (!detailOrder) { setMessages([]); return }
+
+    fetchMessages(detailOrder.id)
+
+    const isActive = !['DELIVERED', 'CANCELLED'].includes(detailOrder.status)
+    if (isActive) {
+      pollRef.current = setInterval(() => fetchMessages(detailOrder.id), 8000)
+    }
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
+  }, [detailOrder?.id, detailOrder?.status, fetchMessages])
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleSendMessage = async () => {
+    if (!detailOrder || !messageInput.trim()) return
+    setSendingMessage(true)
+    try {
+      const { message } = await ordersApi.sendMessage(detailOrder.id, messageInput.trim())
+      setMessages((prev) => [...prev, message])
+      setMessageInput('')
+    } catch {
+      // ignore
+    } finally {
+      setSendingMessage(false)
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -577,6 +636,86 @@ export default function OrdersPage() {
                       {nextStatus === 'CANCELLED' ? 'Cancel Order' : `Mark as ${getStatusLabel(nextStatus, detailOrder.orderType)}`}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Message Thread */}
+              {!['DELIVERED', 'CANCELLED'].includes(detailOrder.status) && (
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <MessageSquare className="h-3.5 w-3.5 text-gray-400" />
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer Chat</p>
+                  </div>
+
+                  <div className="h-40 overflow-y-auto space-y-2 mb-2 pr-1">
+                    {messages.length === 0 ? (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No messages yet.</p>
+                    ) : messages.map((msg) => {
+                      const isStaff = msg.senderType === 'STAFF'
+                      return (
+                        <div key={msg.id} className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5 px-1">
+                            {msg.senderName || (isStaff ? 'Staff' : 'Customer')} · {format(new Date(msg.createdAt), 'HH:mm')}
+                          </span>
+                          <div className={`max-w-[85%] px-2.5 py-1.5 rounded-lg text-xs ${
+                            isStaff
+                              ? 'bg-indigo-600 text-white rounded-tr-none'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage() } }}
+                      placeholder="Type a message…"
+                      className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={sendingMessage || !messageInput.trim()}
+                      className="p-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Closed order messages (read-only) */}
+              {['DELIVERED', 'CANCELLED'].includes(detailOrder.status) && messages.length > 0 && (
+                <div className="border-t border-gray-100 dark:border-gray-700 pt-3 mt-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <MessageSquare className="h-3.5 w-3.5 text-gray-400" />
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Chat History</p>
+                  </div>
+                  <div className="h-32 overflow-y-auto space-y-2 pr-1">
+                    {messages.map((msg) => {
+                      const isStaff = msg.senderType === 'STAFF'
+                      return (
+                        <div key={msg.id} className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5 px-1">
+                            {msg.senderName || (isStaff ? 'Staff' : 'Customer')} · {format(new Date(msg.createdAt), 'HH:mm')}
+                          </span>
+                          <div className={`max-w-[85%] px-2.5 py-1.5 rounded-lg text-xs ${
+                            isStaff
+                              ? 'bg-indigo-600 text-white rounded-tr-none'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                          }`}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
             </div>

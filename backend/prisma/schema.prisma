@@ -93,11 +93,25 @@ model Order {
     updatedAt     DateTime    @updatedAt
 
     // Relations
-    user       User?       @relation(fields: [userId], references: [id])
-    table      Table?      @relation(fields: [tableId], references: [id])
+    user       User?          @relation(fields: [userId], references: [id])
+    table      Table?         @relation(fields: [tableId], references: [id])
     orderItems OrderItem[]
+    messages   OrderMessage[]
 
     @@map("orders")
+}
+
+model OrderMessage {
+    id         String     @id @default(cuid())
+    orderId    String
+    order      Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    content    String
+    senderType SenderType
+    senderName String?
+    isRead     Boolean    @default(false)
+    createdAt  DateTime   @default(now())
+
+    @@map("order_messages")
 }
 
 model OrderItem {
@@ -121,6 +135,11 @@ enum UserRole {
     MANAGER
     STAFF
     CUSTOMER
+}
+
+enum SenderType {
+    CLIENT
+    STAFF
 }
 
 enum OrderStatus {

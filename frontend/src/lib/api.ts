@@ -413,6 +413,36 @@ export const ordersApi = {
     );
     return response.data;
   },
+
+  getMessages: async (id: string) => {
+    const response = await api.get<{
+      messages: Array<{
+        id: string;
+        orderId: string;
+        content: string;
+        senderType: "CLIENT" | "STAFF";
+        senderName: string | null;
+        isRead: boolean;
+        createdAt: string;
+      }>;
+    }>(`/orders/${id}/messages`);
+    return response.data;
+  },
+
+  sendMessage: async (id: string, content: string) => {
+    const response = await api.post<{
+      message: {
+        id: string;
+        orderId: string;
+        content: string;
+        senderType: "CLIENT" | "STAFF";
+        senderName: string | null;
+        isRead: boolean;
+        createdAt: string;
+      };
+    }>(`/orders/${id}/messages`, { content });
+    return response.data;
+  },
 };
 
 // Tables API

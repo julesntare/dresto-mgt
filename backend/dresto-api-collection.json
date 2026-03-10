@@ -470,6 +470,36 @@
           }
         },
         {
+          "name": "Get Order Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests." },
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative — use the accessToken returned when the order was created", "disabled": true }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "description": "Returns the full message thread for an order in chronological order. Also marks incoming messages as read. Auth: Bearer token (staff/customer) or X-Order-Token header (guest). CUSTOMER role is restricted to their own orders."
+          }
+        },
+        {
+          "name": "Send Order Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests." },
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative — use the accessToken returned when the order was created", "disabled": true }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Can you make it less spicy please?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Sends a message on an order. senderType is determined server-side: STAFF for staff/manager/admin JWT, CLIENT for customer JWT or guest X-Order-Token. Blocked on DELIVERED/CANCELLED orders."
+          }
+        },
+        {
           "name": "Delete Order",
           "request": {
             "method": "DELETE",
@@ -657,9 +687,9 @@
             "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2, \"excludedIngredients\": [\"onion\", \"chili\"] },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
             },
-            "description": "No Authorization header needed. Include guestSessionToken (UUID generated once per customer by the mobile app). Response includes accessToken — saved automatically to {{orderAccessToken}}."
+            "description": "No Authorization header needed. Include guestSessionToken (UUID generated once per customer by the mobile app). Response includes accessToken — saved automatically to {{orderAccessToken}}. Use excludedIngredients per item to avoid specific ingredients (must match values from MenuItem.ingredients)."
           }
         },
         {
@@ -730,6 +760,34 @@
               "options": { "raw": { "language": "json" } }
             },
             "description": "Guest submits payment transaction ID using X-Order-Token (the accessToken auto-saved from step 4). No Bearer auth needed. Sets paymentStatus → PENDING_VERIFICATION."
+          }
+        },
+        {
+          "name": "8. Get Order Messages (Guest)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "description": "Poll this endpoint (e.g. every 8 seconds) to get the latest message thread. Use X-Order-Token from step 4. Also marks staff messages as read."
+          }
+        },
+        {
+          "name": "9. Send Message (Guest)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Can I get extra sauce?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Guest sends a message to the kitchen/staff. Uses X-Order-Token for auth. senderType will be CLIENT. Blocked on DELIVERED/CANCELLED orders."
           }
         }
       ]
@@ -820,9 +878,9 @@
             "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
+              "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2, \"excludedIngredients\": [\"onion\"] },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
             },
-            "description": "Order is linked to the authenticated CUSTOMER via userId. accessToken is auto-saved for tracking."
+            "description": "Order is linked to the authenticated CUSTOMER via userId. accessToken is auto-saved for tracking. Use excludedIngredients per item to avoid specific ingredients."
           }
         },
         {
@@ -887,6 +945,34 @@
               "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
             },
             "description": "CUSTOMER can only cancel their own orders. Returns 403 if the order belongs to a different user. Only cancellable if status is not DELIVERED or CANCELLED."
+          }
+        },
+        {
+          "name": "9. Get Order Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "description": "Poll this endpoint (e.g. every 8 seconds) to get the latest message thread. CUSTOMER is restricted to their own orders. Also marks staff messages as read."
+          }
+        },
+        {
+          "name": "10. Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Can I get extra sauce please?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Authenticated customer sends a message to the kitchen/staff. senderType will be CLIENT. Returns 403 if the order belongs to another user. Blocked on DELIVERED/CANCELLED orders."
           }
         }
       ]

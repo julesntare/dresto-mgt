@@ -1112,6 +1112,100 @@ router.patch("/:id/cancel", optionalAuthenticateToken, (async (req, res) => {
   }
 }) as RequestHandler);
 
+// Get messages for an order (staff via JWT, customer via JWT, guest via X-Order-Token)
+router.get("/:id/messages", optionalAuthenticateToken, (async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (!req.user) {
+      const orderToken = req.headers["x-order-token"] as string | undefined;
+      if (!orderToken || orderToken !== order.accessToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    } else if (req.user.role === "CUSTOMER" && order.userId !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const messages = await prisma.orderMessage.findMany({
+      where: { orderId: id },
+      orderBy: { createdAt: "asc" },
+    });
+
+    // Mark unread messages as read (staff reads client messages; client reads staff messages)
+    const isStaff = req.user && req.user.role !== "CUSTOMER";
+    await prisma.orderMessage.updateMany({
+      where: {
+        orderId: id,
+        isRead: false,
+        senderType: isStaff ? "CLIENT" : "STAFF",
+      },
+      data: { isRead: true },
+    });
+
+    res.json({ messages });
+  } catch (error) {
+    console.error("Fetch messages error:", error);
+    res.status(500).json({ message: "Failed to fetch messages" });
+  }
+}) as RequestHandler);
+
+// Send a message on an order
+router.post("/:id/messages", optionalAuthenticateToken, (async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content || typeof content !== "string" || !content.trim()) {
+      return res.status(400).json({ message: "Message content is required" });
+    }
+
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    if (["DELIVERED", "CANCELLED"].includes(order.status)) {
+      return res.status(400).json({ message: "Cannot message on a completed or cancelled order" });
+    }
+
+    let senderType: "CLIENT" | "STAFF";
+    let senderName: string | null;
+
+    if (!req.user) {
+      const orderToken = req.headers["x-order-token"] as string | undefined;
+      if (!orderToken || orderToken !== order.accessToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      senderType = "CLIENT";
+      senderName = order.customerName || "Customer";
+    } else if (req.user.role === "CUSTOMER") {
+      if (order.userId !== req.user.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      senderType = "CLIENT";
+      senderName = req.user.name;
+    } else {
+      senderType = "STAFF";
+      senderName = req.user.name;
+    }
+
+    const message = await prisma.orderMessage.create({
+      data: {
+        orderId: id,
+        content: content.trim(),
+        senderType,
+        senderName,
+      },
+    });
+
+    res.status(201).json({ message });
+  } catch (error) {
+    console.error("Send message error:", error);
+    res.status(500).json({ message: "Failed to send message" });
+  }
+}) as RequestHandler);
+
 // Get order statistics
 router.get(
   "/stats/overview",
