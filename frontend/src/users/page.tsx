@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { usersApi } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
 import { Plus, Edit2, Trash2, Users, ToggleLeft, ToggleRight, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './lib/theme-context'
 import { AuthProvider } from './lib/auth-context'
+import { NotificationProvider } from './lib/notification-context'
 import LoginLayout from './login/layout'
 import LoginPage from './login/page'
 import DashboardLayout from './dashboard/layout'
@@ -18,6 +19,7 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
+          <NotificationProvider>
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
@@ -94,6 +96,7 @@ export default function App() {
             />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

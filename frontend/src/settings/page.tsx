@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { authApi } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
 import { User, Lock, CheckCircle } from 'lucide-react'
 
 export default function SettingsPage() {

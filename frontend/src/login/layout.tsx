@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useAuth } from "../lib/auth-context";
+import { useAuth } from "../lib/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 

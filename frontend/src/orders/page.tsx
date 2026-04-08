@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import { ordersApi, menuApi, categoriesApi, tablesApi } from '../lib/api'
 import type { Table } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
+import { useNotifications } from '../lib/use-notifications'
 import { Plus, Eye, X, ChevronLeft, ChevronRight, ShoppingCart, Trash2, Send, MessageSquare } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -104,6 +106,7 @@ interface NewOrderForm {
 
 export default function OrdersPage() {
   const { user } = useAuth()
+  const { lastOrderEventAt } = useNotifications()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -116,6 +119,7 @@ export default function OrdersPage() {
   const LIMIT = 10
 
   // Detail panel
+  const location = useLocation()
   const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
 
@@ -207,6 +211,26 @@ export default function OrdersPage() {
   }
 
   useEffect(() => { fetchOrders() }, [filterStatus, filterType, page])
+
+  // Refresh when a new SSE order event arrives
+  useEffect(() => {
+    if (lastOrderEventAt === 0) return
+    fetchOrders()
+  }, [lastOrderEventAt])
+
+  // 30s polling fallback (in case SSE disconnects)
+  useEffect(() => {
+    const interval = setInterval(fetchOrders, 30_000)
+    return () => clearInterval(interval)
+  }, [filterStatus, filterType, page])
+
+  // Auto-open order from notification navigation
+  useEffect(() => {
+    const openOrderId = (location.state as { openOrderId?: string } | null)?.openOrderId
+    if (!openOrderId || orders.length === 0) return
+    const target = orders.find((o) => o.id === openOrderId)
+    if (target) setDetailOrder(target)
+  }, [orders, location.state])
 
   const openCreate = async () => {
     setCreateError(null)

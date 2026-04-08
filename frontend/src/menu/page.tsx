@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 import { menuApi, categoriesApi } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
 import { Plus, Edit2, Trash2, Search, UtensilsCrossed, ImageOff, X } from 'lucide-react'
 
 interface Category { id: string; name: string; isActive: boolean }

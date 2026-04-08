@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ordersApi } from '../lib/api'
-import { useTheme } from '../lib/theme-context'
+import { useTheme } from '../lib/use-theme'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,

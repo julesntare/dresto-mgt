@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Sidebar from "../components/layout/sidebar";
 import ProtectedRoute from "../components/ui/protected-route";
+import NotificationToastContainer from "../components/ui/notification-toast";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +15,7 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-auto">
           {children}
         </main>
+        <NotificationToastContainer />
       </div>
     </ProtectedRoute>
   );

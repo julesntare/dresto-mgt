@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { categoriesApi } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
 import { Plus, Edit2, Trash2, Tag } from 'lucide-react'
 
 interface Category {

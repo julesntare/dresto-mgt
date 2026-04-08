@@ -64,7 +64,7 @@ interface Order {
     name: string;
     email: string;
   };
-  paymentStatus: 'UNPAID' | 'PENDING_VERIFICATION' | 'PAID';
+  paymentStatus: "UNPAID" | "PENDING_VERIFICATION" | "PAID";
   transactionId?: string;
   paymentProvider?: string;
   paidAt?: string;
@@ -76,7 +76,11 @@ interface CreateOrderData {
   orderType: "DINE_IN" | "TAKEAWAY" | "DELIVERY";
   tableId?: string;
   notes?: string;
-  items: { menuItemId: string; quantity: number; excludedIngredients?: string[] }[];
+  items: {
+    menuItemId: string;
+    quantity: number;
+    excludedIngredients?: string[];
+  }[];
 }
 
 interface OrderFilters {
@@ -115,7 +119,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 function redirectToLogin() {
@@ -166,7 +170,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API functions
@@ -201,7 +205,10 @@ export const authApi = {
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    const response = await api.put("/auth/change-password", { currentPassword, newPassword });
+    const response = await api.put("/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
     return response.data;
   },
 
@@ -233,7 +240,7 @@ export const menuApi = {
   createItem: async (itemData: CreateMenuItemData) => {
     const response = await api.post<{ message: string; menuItem: MenuItem }>(
       "/menu",
-      itemData
+      itemData,
     );
     return response.data;
   },
@@ -241,7 +248,7 @@ export const menuApi = {
   updateItem: async (id: string, itemData: Partial<CreateMenuItemData>) => {
     const response = await api.put<{ message: string; menuItem: MenuItem }>(
       `/menu/${id}`,
-      itemData
+      itemData,
     );
     return response.data;
   },
@@ -257,7 +264,7 @@ export const menuApi = {
       {
         itemIds,
         isAvailable,
-      }
+      },
     );
     return response.data;
   },
@@ -280,18 +287,18 @@ export const categoriesApi = {
   create: async (categoryData: { name: string; description?: string }) => {
     const response = await api.post<{ message: string; category: Category }>(
       "/categories",
-      categoryData
+      categoryData,
     );
     return response.data;
   },
 
   update: async (
     id: string,
-    categoryData: { name?: string; description?: string; isActive?: boolean }
+    categoryData: { name?: string; description?: string; isActive?: boolean },
   ) => {
     const response = await api.put<{ message: string; category: Category }>(
       `/categories/${id}`,
-      categoryData
+      categoryData,
     );
     return response.data;
   },
@@ -303,7 +310,7 @@ export const categoriesApi = {
 };
 
 // Users API functions (Admin only)
-type UserRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER';
+type UserRole = "ADMIN" | "MANAGER" | "STAFF" | "CUSTOMER";
 
 export const usersApi = {
   getAll: async () => {
@@ -323,13 +330,48 @@ export const usersApi = {
     return response.data;
   },
 
-  create: async (userData: { email?: string; phone?: string; password?: string; name: string; role?: UserRole }) => {
-    const response = await api.post<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: UserRole; isActive: boolean; createdAt: string } }>("/users", userData);
+  create: async (userData: {
+    email?: string;
+    phone?: string;
+    password?: string;
+    name: string;
+    role?: UserRole;
+  }) => {
+    const response = await api.post<{
+      message: string;
+      user: {
+        id: string;
+        email: string | null;
+        phone: string | null;
+        name: string;
+        role: UserRole;
+        isActive: boolean;
+        createdAt: string;
+      };
+    }>("/users", userData);
     return response.data;
   },
 
-  update: async (id: string, data: { name?: string; phone?: string; role?: UserRole; isActive?: boolean }) => {
-    const response = await api.put<{ message: string; user: { id: string; email: string | null; phone: string | null; name: string; role: UserRole; isActive: boolean } }>(`/users/${id}`, data);
+  update: async (
+    id: string,
+    data: {
+      name?: string;
+      phone?: string;
+      role?: UserRole;
+      isActive?: boolean;
+    },
+  ) => {
+    const response = await api.put<{
+      message: string;
+      user: {
+        id: string;
+        email: string | null;
+        phone: string | null;
+        name: string;
+        role: UserRole;
+        isActive: boolean;
+      };
+    }>(`/users/${id}`, data);
     return response.data;
   },
 
@@ -339,7 +381,10 @@ export const usersApi = {
   },
 
   resetPassword: async (id: string, newPassword: string) => {
-    const response = await api.patch<{ message: string }>(`/users/${id}/password`, { newPassword });
+    const response = await api.patch<{ message: string }>(
+      `/users/${id}/password`,
+      { newPassword },
+    );
     return response.data;
   },
 };
@@ -367,7 +412,7 @@ export const ordersApi = {
   create: async (orderData: CreateOrderData) => {
     const response = await api.post<{ message: string; order: Order }>(
       "/orders",
-      orderData
+      orderData,
     );
     return response.data;
   },
@@ -375,7 +420,7 @@ export const ordersApi = {
   updateStatus: async (id: string, status: string) => {
     const response = await api.patch<{ message: string; order: Order }>(
       `/orders/${id}/status`,
-      { status }
+      { status },
     );
     return response.data;
   },
@@ -383,7 +428,7 @@ export const ordersApi = {
   cancel: async (id: string, reason?: string) => {
     const response = await api.patch<{ message: string; order: Order }>(
       `/orders/${id}/cancel`,
-      { reason }
+      { reason },
     );
     return response.data;
   },
@@ -402,10 +447,14 @@ export const ordersApi = {
     return response.data;
   },
 
-  recordPayment: async (id: string, transactionId: string, provider?: string) => {
+  recordPayment: async (
+    id: string,
+    transactionId: string,
+    provider?: string,
+  ) => {
     const response = await api.post<{ message: string; order: Order }>(
       `/orders/${id}/payment`,
-      { transactionId, provider }
+      { transactionId, provider },
     );
     return response.data;
   },
@@ -413,7 +462,7 @@ export const ordersApi = {
   confirmPayment: async (id: string) => {
     const response = await api.patch<{ message: string; order: Order }>(
       `/orders/${id}/payment/confirm`,
-      {}
+      {},
     );
     return response.data;
   },
@@ -470,18 +519,39 @@ export const tablesApi = {
     return response.data;
   },
 
-  create: async (data: { number: string; capacity: number; location?: string }) => {
-    const response = await api.post<{ message: string; table: Table }>("/tables", data);
+  create: async (data: {
+    number: string;
+    capacity: number;
+    location?: string;
+  }) => {
+    const response = await api.post<{ message: string; table: Table }>(
+      "/tables",
+      data,
+    );
     return response.data;
   },
 
-  update: async (id: string, data: { number?: string; capacity?: number; location?: string; isActive?: boolean }) => {
-    const response = await api.put<{ message: string; table: Table }>(`/tables/${id}`, data);
+  update: async (
+    id: string,
+    data: {
+      number?: string;
+      capacity?: number;
+      location?: string;
+      isActive?: boolean;
+    },
+  ) => {
+    const response = await api.put<{ message: string; table: Table }>(
+      `/tables/${id}`,
+      data,
+    );
     return response.data;
   },
 
   updateStatus: async (id: string, status: TableStatus) => {
-    const response = await api.patch<{ message: string; table: Table }>(`/tables/${id}/status`, { status });
+    const response = await api.patch<{ message: string; table: Table }>(
+      `/tables/${id}/status`,
+      { status },
+    );
     return response.data;
   },
 

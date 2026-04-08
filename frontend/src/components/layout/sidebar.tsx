@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../../lib/auth-context";
+import { useAuth } from "../../lib/use-auth";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -14,7 +14,8 @@ import {
   Grid3x3,
 } from "lucide-react";
 import { useState } from "react";
-import { useTheme } from "../../lib/theme-context";
+import { useTheme } from "../../lib/use-theme";
+import NotificationBell from "../ui/notification-bell";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -88,6 +89,10 @@ export default function Sidebar() {
             <p className="font-medium text-white">{user?.name}</p>
             <p>{user?.role}</p>
           </div>
+        )}
+
+        {["ADMIN", "MANAGER", "STAFF"].includes(user?.role || "") && (
+          <NotificationBell collapsed={collapsed} />
         )}
 
         <button

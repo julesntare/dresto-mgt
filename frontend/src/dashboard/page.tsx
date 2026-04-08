@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, type ReactNode } from "react";
-import { useAuth } from "../lib/auth-context";
-import { useTheme } from "../lib/theme-context";
+import { useAuth } from "../lib/use-auth";
+import { useTheme } from "../lib/use-theme";
 import { ordersApi } from "../lib/api";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { tablesApi } from '../lib/api'
 import type { Table, TableStatus } from '../lib/api'
-import { useAuth } from '../lib/auth-context'
+import { useAuth } from '../lib/use-auth'
 import { Plus, Pencil, Trash2, UtensilsCrossed } from 'lucide-react'
 import { format } from 'date-fns'
 
