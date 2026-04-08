@@ -91,7 +91,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       addNotification({
         type: "ORDER_CREATED",
         title: "New Order",
-        body: `${data.customerName} placed order ${data.orderNumber}`,
+        body: `${data.customerName} placed order ${data.orderNumber} · ${data.status ?? "PENDING"}`,
         createdAt: data.createdAt,
         orderId: data.orderId,
         orderNumber: data.orderNumber,

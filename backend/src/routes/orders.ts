@@ -808,6 +808,7 @@ router.post(
         customerName: order.customerName || "Guest",
         orderType: order.orderType,
         totalAmount: order.totalAmount,
+        status: order.status,
         createdAt: order.createdAt,
       };
       sseManager.broadcast("order_created", notifData, STAFF_ROLES);
