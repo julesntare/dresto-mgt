@@ -4,6 +4,10 @@ import { prisma } from "../lib/prisma";
 import { authenticateToken, optionalAuthenticateToken, requireRole } from "../middleware/auth";
 import { orderValidation, handleValidationErrors } from "../utils/validation";
 import { generateOrderNumber, calculateOrderTotal } from "../utils/helpers";
+import { sseManager } from "../lib/sseManager";
+import { sendPushToRoles } from "../lib/webPush";
+
+const STAFF_ROLES = ["ADMIN", "MANAGER", "STAFF"];
 
 /**
  * @swagger
@@ -795,6 +799,23 @@ router.post(
         message: "Order created successfully",
         order,
       });
+
+      // Notify staff of new order
+      const notifData = {
+        type: "ORDER_CREATED",
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName || "Guest",
+        orderType: order.orderType,
+        totalAmount: order.totalAmount,
+        createdAt: order.createdAt,
+      };
+      sseManager.broadcast("order_created", notifData, STAFF_ROLES);
+      sendPushToRoles(
+        "New Order",
+        `${notifData.customerName} placed order ${order.orderNumber}`,
+        STAFF_ROLES
+      ).catch(console.error);
     } catch (error) {
       console.error("Order creation error:", error);
       res.status(500).json({ message: "Failed to create order" });
@@ -858,6 +879,21 @@ router.patch("/:id/status", authenticateToken, requireRole(["ADMIN", "MANAGER", 
       message: "Order status updated successfully",
       order,
     });
+
+    // Notify staff of status change
+    const notifData = {
+      type: "ORDER_UPDATED",
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      updatedAt: order.updatedAt,
+    };
+    sseManager.broadcast("order_updated", notifData, STAFF_ROLES);
+    sendPushToRoles(
+      "Order Updated",
+      `Order ${order.orderNumber} is now ${order.status}`,
+      STAFF_ROLES
+    ).catch(console.error);
   } catch (error) {
     console.error("Order status update error:", error);
     res.status(500).json({ message: "Failed to update order status" });
@@ -1106,6 +1142,20 @@ router.patch("/:id/cancel", optionalAuthenticateToken, (async (req, res) => {
       message: "Order cancelled successfully",
       order: updatedOrder,
     });
+
+    // Notify staff of cancellation
+    const notifData = {
+      type: "ORDER_CANCELLED",
+      orderId: updatedOrder.id,
+      orderNumber: updatedOrder.orderNumber,
+      updatedAt: updatedOrder.updatedAt,
+    };
+    sseManager.broadcast("order_updated", notifData, STAFF_ROLES);
+    sendPushToRoles(
+      "Order Cancelled",
+      `Order ${updatedOrder.orderNumber} was cancelled`,
+      STAFF_ROLES
+    ).catch(console.error);
   } catch (error) {
     console.error("Order cancellation error:", error);
     res.status(500).json({ message: "Failed to cancel order" });

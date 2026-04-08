@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orders";
 import categoryRoutes from "./routes/categories";
 import userRoutes from "./routes/users";
 import tableRoutes from "./routes/tables";
+import notificationRoutes from "./routes/notifications";
 import { prisma } from "./lib/prisma";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -41,9 +42,19 @@ const apiLimiter = rateLimit({
 
 // Middleware
 app.use(helmet());
+const allowedOrigins = (process.env.FRONTEND_URL ?? "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true,
   })
 );
@@ -66,6 +77,7 @@ app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tables", tableRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 // 404 handler
 // API Documentation
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
