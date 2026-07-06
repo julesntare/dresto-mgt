@@ -130,6 +130,40 @@ model OrderItem {
     @@map("order_items")
 }
 
+model Restaurant {
+    id              String   @id @default(cuid())
+    name            String
+    logoUrl         String?
+    themeColor      String?  @default("#000000")
+    currency        String   @default("RWF")
+    languages       String[] @default(["en"])
+
+    // Channel toggles — a bar with no kitchen turns off delivery; a ghost kitchen turns off dine-in
+    dineInEnabled   Boolean  @default(true)
+    takeawayEnabled Boolean  @default(true)
+    deliveryEnabled Boolean  @default(false)
+
+    // Money rules
+    serviceChargePct Decimal? @db.Decimal(5, 2)
+    vatEnabled       Boolean  @default(false)
+    vatPct           Decimal? @db.Decimal(5, 2)
+    deliveryFee      Decimal? @db.Decimal(10, 2)
+    deliveryMinOrder Decimal? @db.Decimal(10, 2)
+
+    // Payment providers enabled (checkbox list in admin)
+    momoEnabled      Boolean  @default(true)
+    airtelEnabled    Boolean  @default(false)
+    cardEnabled      Boolean  @default(false)
+    cashEnabled      Boolean  @default(true)
+
+    openingHours     Json?                           // per-day open/close; auto-close ordering when shut
+    orderingBaseUrl  String?                          // base URL customer ordering QR codes point to
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    @@map("restaurant")
+}
+
 enum UserRole {
     ADMIN
     MANAGER

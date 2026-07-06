@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
-import { ordersApi, menuApi, categoriesApi, tablesApi } from '../lib/api'
+import { ordersApi, menuApi, categoriesApi, tablesApi, restaurantApi } from '../lib/api'
 import type { Table } from '../lib/api'
 import { useAuth } from '../lib/use-auth'
 import { useNotifications } from '../lib/use-notifications'
@@ -141,6 +141,7 @@ export default function OrdersPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [availableTables, setAvailableTables] = useState<Table[]>([])
+  const [enabledOrderTypes, setEnabledOrderTypes] = useState<OrderType[]>(['DINE_IN', 'TAKEAWAY', 'DELIVERY'])
   const [menuFilterCat, setMenuFilterCat] = useState('')
   const [newOrder, setNewOrder] = useState<NewOrderForm>({
     customerName: '', customerPhone: '', orderType: 'DINE_IN', tableId: '', notes: '', items: [],
@@ -234,18 +235,26 @@ export default function OrdersPage() {
 
   const openCreate = async () => {
     setCreateError(null)
-    setNewOrder({ customerName: '', customerPhone: '', orderType: 'DINE_IN', tableId: '', notes: '', items: [] })
     try {
-      const [menuData, catData, tableData] = await Promise.all([
+      const [menuData, catData, tableData, restaurantData] = await Promise.all([
         menuApi.getItems({ available: true }),
         categoriesApi.getAll(),
         tablesApi.getAll({ isActive: true }),
+        restaurantApi.get(),
       ])
       setMenuItems(menuData.menuItems)
       setCategories(catData.categories.filter((c) => c.isActive))
       setAvailableTables(tableData.tables.filter((t) => t.status === 'AVAILABLE'))
+
+      const { restaurant } = restaurantData
+      const enabled = (['DINE_IN', 'TAKEAWAY', 'DELIVERY'] as OrderType[]).filter((t) =>
+        t === 'DINE_IN' ? restaurant.dineInEnabled : t === 'TAKEAWAY' ? restaurant.takeawayEnabled : restaurant.deliveryEnabled
+      )
+      setEnabledOrderTypes(enabled.length > 0 ? enabled : ['DINE_IN', 'TAKEAWAY', 'DELIVERY'])
+      setNewOrder({ customerName: '', customerPhone: '', orderType: enabled[0] ?? 'DINE_IN', tableId: '', notes: '', items: [] })
     } catch {
       setCreateError('Failed to load menu.')
+      setNewOrder({ customerName: '', customerPhone: '', orderType: 'DINE_IN', tableId: '', notes: '', items: [] })
     }
     setCreateOpen(true)
   }
@@ -851,9 +860,9 @@ export default function OrdersPage() {
                       onChange={(e) => setNewOrder({ ...newOrder, orderType: e.target.value as OrderType })}
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                      <option value="DINE_IN">Dine In</option>
-                      <option value="TAKEAWAY">Takeaway</option>
-                      <option value="DELIVERY">Delivery</option>
+                      {enabledOrderTypes.map((t) => (
+                        <option key={t} value={t}>{ORDER_TYPE_LABEL[t]}</option>
+                      ))}
                     </select>
                   </div>
                   {newOrder.orderType === 'DINE_IN' && (

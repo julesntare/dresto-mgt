@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { tablesApi } from '../lib/api'
+import { tablesApi, restaurantApi } from '../lib/api'
 import type { Table, TableStatus } from '../lib/api'
 import { useAuth } from '../lib/use-auth'
-import { Plus, Pencil, Trash2, UtensilsCrossed } from 'lucide-react'
+import { Plus, Pencil, Trash2, UtensilsCrossed, QrCode, Download, Printer } from 'lucide-react'
 import { format } from 'date-fns'
+import QRCode from 'qrcode'
 
 const STATUS_COLORS: Record<TableStatus, string> = {
   AVAILABLE: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -43,6 +44,12 @@ export default function TablesPage() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
+  // QR modal
+  const [orderingBaseUrl, setOrderingBaseUrl] = useState<string | null>(null)
+  const [qrTable, setQrTable] = useState<Table | null>(null)
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const [qrError, setQrError] = useState<string | null>(null)
+
   const isAdmin = user?.role === 'ADMIN'
 
   const fetchTables = async () => {
@@ -57,7 +64,54 @@ export default function TablesPage() {
     }
   }
 
-  useEffect(() => { fetchTables() }, [])
+  useEffect(() => {
+    fetchTables()
+    restaurantApi.get()
+      .then(({ restaurant }) => setOrderingBaseUrl(restaurant.orderingBaseUrl ?? null))
+      .catch(() => {})
+  }, [])
+
+  const openQr = async (table: Table) => {
+    setQrTable(table)
+    setQrDataUrl(null)
+    setQrError(orderingBaseUrl ? null : 'Set an Ordering Link Base URL in Settings first.')
+    if (!orderingBaseUrl) return
+    try {
+      const separator = orderingBaseUrl.includes('?') ? '&' : '?'
+      const url = `${orderingBaseUrl}${separator}table=${table.id}`
+      const dataUrl = await QRCode.toDataURL(url, { width: 320, margin: 2 })
+      setQrDataUrl(dataUrl)
+    } catch {
+      setQrError('Failed to generate QR code.')
+    }
+  }
+
+  const handleDownloadQr = () => {
+    if (!qrDataUrl || !qrTable) return
+    const a = document.createElement('a')
+    a.href = qrDataUrl
+    a.download = `table-${qrTable.number}-qr.png`
+    a.click()
+  }
+
+  const handlePrintQr = () => {
+    if (!qrDataUrl || !qrTable) return
+    const win = window.open('', '_blank', 'width=400,height=520')
+    if (!win) return
+    win.document.write(`
+      <html>
+        <head><title>Table ${qrTable.number} QR</title></head>
+        <body style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;padding:24px;">
+          <h2>Table ${qrTable.number}</h2>
+          <img src="${qrDataUrl}" style="width:280px;height:280px;" />
+          <p>Scan to order</p>
+        </body>
+      </html>
+    `)
+    win.document.close()
+    win.focus()
+    win.print()
+  }
 
   const openCreate = () => {
     setCreateForm(emptyForm)
@@ -237,6 +291,13 @@ export default function TablesPage() {
                           {table.status === 'AVAILABLE' ? 'Reserve' : table.status === 'RESERVED' ? 'Free' : 'Occupied'}
                         </button>
                         <button
+                          onClick={() => openQr(table)}
+                          className="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors"
+                          title="View / print table QR"
+                        >
+                          <QrCode className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => openEdit(table)}
                           className="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 transition-colors"
                           title="Edit table"
@@ -389,6 +450,34 @@ export default function TablesPage() {
               <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
                 {deleting ? 'Deleting…' : 'Delete'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Modal */}
+      {qrTable && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Table {qrTable.number} QR</h2>
+              <button onClick={() => setQrTable(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none">&times;</button>
+            </div>
+            <div className="px-6 py-6 flex flex-col items-center gap-4">
+              {qrError && <p className="text-sm text-red-600 dark:text-red-400 text-center">{qrError}</p>}
+              {qrDataUrl && (
+                <img src={qrDataUrl} alt={`QR code for table ${qrTable.number}`} className="w-56 h-56 rounded-md border border-gray-200 dark:border-gray-700" />
+              )}
+              {qrDataUrl && (
+                <div className="flex gap-3">
+                  <button onClick={handleDownloadQr} className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <Download className="h-4 w-4" /> Download
+                  </button>
+                  <button onClick={handlePrintQr} className="flex items-center gap-2 px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <Printer className="h-4 w-4" /> Print
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

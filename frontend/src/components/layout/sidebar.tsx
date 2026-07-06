@@ -12,6 +12,7 @@ import {
   Sun,
   Moon,
   Grid3x3,
+  ChefHat,
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "../../lib/use-theme";
@@ -21,6 +22,12 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Menu Items", href: "/dashboard/menu", icon: UtensilsCrossed },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
+  {
+    name: "Kitchen Board",
+    href: "/dashboard/kitchen",
+    icon: ChefHat,
+    roles: ["ADMIN", "MANAGER", "STAFF"],
+  },
   { name: "Categories", href: "/dashboard/categories", icon: Menu },
   {
     name: "Analytics",

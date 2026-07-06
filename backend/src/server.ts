@@ -18,6 +18,7 @@ import categoryRoutes from "./routes/categories";
 import userRoutes from "./routes/users";
 import tableRoutes from "./routes/tables";
 import notificationRoutes from "./routes/notifications";
+import restaurantRoutes from "./routes/restaurant";
 import { prisma } from "./lib/prisma";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -78,6 +79,7 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tables", tableRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/restaurant", restaurantRoutes);
 // 404 handler
 // API Documentation
 app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

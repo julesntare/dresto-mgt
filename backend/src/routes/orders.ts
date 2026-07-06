@@ -3,7 +3,7 @@ import express, { RequestHandler } from "express";
 import { prisma } from "../lib/prisma";
 import { authenticateToken, optionalAuthenticateToken, requireRole } from "../middleware/auth";
 import { orderValidation, handleValidationErrors } from "../utils/validation";
-import { generateOrderNumber, calculateOrderTotal } from "../utils/helpers";
+import { generateOrderNumber, calculateOrderTotal, isRestaurantOpenNow, RESTAURANT_SINGLETON_ID } from "../utils/helpers";
 import { sseManager } from "../lib/sseManager";
 import { sendPushToRoles } from "../lib/webPush";
 
@@ -704,6 +704,31 @@ router.post(
         guestSessionToken,
       } = req.body;
       const userId = req.user?.id || null;
+
+      // Enforce per-resto channel toggles and opening hours (§4.2-1 settings)
+      const restaurant = await prisma.restaurant.findUnique({
+        where: { id: RESTAURANT_SINGLETON_ID },
+      });
+      if (restaurant) {
+        const channelEnabled =
+          orderType === "DINE_IN"
+            ? restaurant.dineInEnabled
+            : orderType === "TAKEAWAY"
+            ? restaurant.takeawayEnabled
+            : orderType === "DELIVERY"
+            ? restaurant.deliveryEnabled
+            : true;
+        if (!channelEnabled) {
+          return res
+            .status(400)
+            .json({ message: `${orderType.replace("_", "-")} ordering is currently unavailable` });
+        }
+
+        const isStaff = req.user && STAFF_ROLES.includes(req.user.role);
+        if (!isStaff && !isRestaurantOpenNow(restaurant.openingHours)) {
+          return res.status(400).json({ message: "The restaurant is currently closed" });
+        }
+      }
 
       // Validate table for DINE_IN orders
       if (orderType === "DINE_IN" && tableId) {

@@ -498,6 +498,60 @@ export const ordersApi = {
   },
 };
 
+// Restaurant settings API
+export interface DayHours {
+  open?: string;
+  close?: string;
+}
+
+export type OpeningHours = Partial<
+  Record<"sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat", DayHours>
+>;
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  logoUrl?: string | null;
+  themeColor?: string | null;
+  currency: string;
+  languages: string[];
+  dineInEnabled: boolean;
+  takeawayEnabled: boolean;
+  deliveryEnabled: boolean;
+  serviceChargePct?: number | null;
+  vatEnabled: boolean;
+  vatPct?: number | null;
+  deliveryFee?: number | null;
+  deliveryMinOrder?: number | null;
+  momoEnabled: boolean;
+  airtelEnabled: boolean;
+  cardEnabled: boolean;
+  cashEnabled: boolean;
+  openingHours?: OpeningHours | null;
+  orderingBaseUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RestaurantUpdateData = Partial<
+  Omit<Restaurant, "id" | "createdAt" | "updatedAt">
+>;
+
+export const restaurantApi = {
+  get: async () => {
+    const response = await api.get<{ restaurant: Restaurant }>("/restaurant");
+    return response.data;
+  },
+
+  update: async (data: RestaurantUpdateData) => {
+    const response = await api.put<{ message: string; restaurant: Restaurant }>(
+      "/restaurant",
+      data,
+    );
+    return response.data;
+  },
+};
+
 // Tables API
 export type TableStatus = "AVAILABLE" | "OCCUPIED" | "RESERVED";
 

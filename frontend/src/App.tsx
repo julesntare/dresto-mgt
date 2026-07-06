@@ -13,6 +13,7 @@ import AnalyticsPage from './analytics/page'
 import UsersPage from './users/page'
 import TablesPage from './tables/page'
 import SettingsPage from './settings/page'
+import KitchenPage from './kitchen/page'
 
 export default function App() {
   return (
@@ -75,6 +76,14 @@ export default function App() {
               element={
                 <DashboardLayout>
                   <TablesPage />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/dashboard/kitchen"
+              element={
+                <DashboardLayout>
+                  <KitchenPage />
                 </DashboardLayout>
               }
             />
