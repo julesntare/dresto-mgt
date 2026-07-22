@@ -103,4 +103,46 @@ router.delete(
   }) as RequestHandler
 );
 
+// POST /notifications/devices — register an FCM token for mobile push.
+// Any authenticated role, since customers are the main audience here.
+router.post(
+  "/devices",
+  authenticateToken,
+  (async (req, res) => {
+    const { token, platform } = req.body;
+    if (typeof token !== "string" || token.trim() === "") {
+      return res.status(400).json({ message: "token is required" });
+    }
+    if (platform && !["android", "ios"].includes(platform)) {
+      return res.status(400).json({ message: "platform must be 'android' or 'ios'" });
+    }
+
+    // A device can change hands between accounts (logout/login), so reassign
+    // an existing token rather than rejecting it.
+    await prisma.deviceToken.upsert({
+      where: { token },
+      create: { token, platform: platform ?? "android", userId: req.user!.id },
+      update: { userId: req.user!.id, platform: platform ?? "android" },
+    });
+
+    res.json({ message: "Device registered" });
+  }) as RequestHandler
+);
+
+// DELETE /notifications/devices — unregister an FCM token (called on logout)
+router.delete(
+  "/devices",
+  authenticateToken,
+  (async (req, res) => {
+    const { token } = req.body;
+    if (typeof token !== "string" || token.trim() === "") {
+      return res.status(400).json({ message: "token is required" });
+    }
+    await prisma.deviceToken.deleteMany({
+      where: { token, userId: req.user!.id },
+    });
+    res.json({ message: "Device unregistered" });
+  }) as RequestHandler
+);
+
 export default router;

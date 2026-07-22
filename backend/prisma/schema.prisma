@@ -20,8 +20,24 @@ model User {
     // Relations
     orders Order[]
     passwordResetTokens PasswordResetToken[]
+    deviceTokens DeviceToken[]
 
     @@map("users")
+}
+
+// FCM registration tokens for mobile push. One row per device install;
+// upserted on app start and whenever FCM rotates the token.
+model DeviceToken {
+    id        String   @id @default(cuid())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    token     String   @unique
+    platform  String   @default("android")
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+    @@map("device_tokens")
 }
 
 model PasswordResetToken {

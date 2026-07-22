@@ -12,6 +12,11 @@ yarn-error.log*
 .env
 .env.*
 
+# Firebase / GCP service account keys — never commit
+*serviceAccountKey*.json
+*-firebase-adminsdk-*.json
+service-account*.json
+
 # Runtime data
 pids/
 *.pid

@@ -42,8 +42,22 @@
           "name": "Register (Customer self-registration)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John Doe\",\n  \"phone\": \"08123456789\"\n}"
@@ -70,8 +84,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"admin@dresto.com\",\n  \"password\": \"password123\"\n}"
@@ -98,8 +126,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"phone\": \"08123456789\",\n  \"password\": \"password123\"\n}"
@@ -125,8 +167,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
@@ -137,8 +193,22 @@
           "name": "Get Me",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
           }
         },
         {
@@ -146,10 +216,25 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Updated Name\"\n}"
@@ -161,10 +246,25 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\"\n}"
@@ -175,8 +275,22 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
           }
         }
       ]
@@ -190,10 +304,18 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/categories",
-              "host": ["{{baseUrl}}"],
-              "path": ["categories"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ],
               "query": [
-                { "key": "includeInactive", "value": "false", "disabled": true }
+                {
+                  "key": "includeInactive",
+                  "value": "false",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -202,7 +324,22 @@
           "name": "Get Category by ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+            "url": {
+              "raw": "{{baseUrl}}/categories/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CATEGORY_ID_HERE"
+                }
+              ]
+            }
           }
         },
         {
@@ -210,10 +347,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Main Course\",\n  \"description\": \"Primary dishes\"\n}"
@@ -225,10 +376,31 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/categories/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CATEGORY_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Main Course Updated\",\n  \"description\": \"Updated description\",\n  \"isActive\": true\n}"
@@ -239,8 +411,28 @@
           "name": "Delete Category",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/categories/:id", "host": ["{{baseUrl}}"], "path": ["categories", ":id"], "variable": [{ "key": "id", "value": "CATEGORY_ID_HERE" }] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categories/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CATEGORY_ID_HERE"
+                }
+              ]
+            }
           }
         }
       ]
@@ -254,12 +446,28 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/menu",
-              "host": ["{{baseUrl}}"],
-              "path": ["menu"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ],
               "query": [
-                { "key": "categoryId", "value": "", "disabled": true },
-                { "key": "available", "value": "true", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "available",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -268,7 +476,22 @@
           "name": "Get Menu Item by ID",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] }
+            "url": {
+              "raw": "{{baseUrl}}/menu/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "MENU_ITEM_ID_HERE"
+                }
+              ]
+            }
           }
         },
         {
@@ -276,10 +499,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/menu", "host": ["{{baseUrl}}"], "path": ["menu"] },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Nasi Goreng\",\n  \"description\": \"Indonesian fried rice\",\n  \"price\": 35000,\n  \"categoryId\": \"CATEGORY_ID_HERE\",\n  \"image\": \"https://example.com/nasi-goreng.jpg\",\n  \"isAvailable\": true\n}"
@@ -291,10 +528,31 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/menu/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "MENU_ITEM_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Nasi Goreng Special\",\n  \"description\": \"Special Indonesian fried rice\",\n  \"price\": 40000,\n  \"categoryId\": \"CATEGORY_ID_HERE\",\n  \"isAvailable\": true\n}"
@@ -305,8 +563,28 @@
           "name": "Delete Menu Item",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/menu/:id", "host": ["{{baseUrl}}"], "path": ["menu", ":id"], "variable": [{ "key": "id", "value": "MENU_ITEM_ID_HERE" }] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/menu/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "MENU_ITEM_ID_HERE"
+                }
+              ]
+            }
           }
         },
         {
@@ -314,10 +592,25 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/menu/bulk-availability", "host": ["{{baseUrl}}"], "path": ["menu", "bulk-availability"] },
+            "url": {
+              "raw": "{{baseUrl}}/menu/bulk-availability",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "bulk-availability"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"itemIds\": [\"MENU_ITEM_ID_1\", \"MENU_ITEM_ID_2\"],\n  \"isAvailable\": false\n}"
@@ -333,15 +626,38 @@
           "name": "Get My Orders",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/orders/mine",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "mine"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "mine"
+              ],
               "query": [
-                { "key": "status", "value": "PENDING", "disabled": true, "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED" },
-                { "key": "page", "value": "1", "disabled": true },
-                { "key": "limit", "value": "10", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true,
+                  "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
               ]
             },
             "description": "Returns paginated orders belonging to the authenticated user (filtered by userId)."
@@ -354,8 +670,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "track", "{{orderAccessToken}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "track",
+                "{{orderAccessToken}}"
+              ]
             },
             "description": "Public — no auth required. Use the accessToken returned by POST /orders to track any order (guest or logged-in)."
           }
@@ -364,18 +686,53 @@
           "name": "Get All Orders",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ],
               "query": [
-                { "key": "status", "value": "PENDING", "disabled": true, "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED" },
-                { "key": "orderType", "value": "DINE_IN", "disabled": true, "description": "DINE_IN | TAKEAWAY | DELIVERY" },
-                { "key": "startDate", "value": "2026-01-01", "disabled": true },
-                { "key": "endDate", "value": "2026-12-31", "disabled": true },
-                { "key": "page", "value": "1", "disabled": true },
-                { "key": "limit", "value": "10", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true,
+                  "description": "PENDING | CONFIRMED | PREPARING | READY | DELIVERED | CANCELLED"
+                },
+                {
+                  "key": "orderType",
+                  "value": "DINE_IN",
+                  "disabled": true,
+                  "description": "DINE_IN | TAKEAWAY | DELIVERY"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
               ]
             },
             "description": "Requires auth. ADMIN/MANAGER/STAFF see all orders. CUSTOMER role automatically sees only their own orders (filtered by userId server-side)."
@@ -385,8 +742,28 @@
           "name": "Get Order by ID",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            }
           }
         },
         {
@@ -394,10 +771,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2 },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
@@ -409,10 +800,31 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"Extra sauce\"\n}"
@@ -424,14 +836,40 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/status", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "status"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "ADMIN/MANAGER/STAFF only — CUSTOMER role is not allowed. Valid statuses: PENDING → CONFIRMED → PREPARING → READY → DELIVERED | CANCELLED"
           }
@@ -441,15 +879,47 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Use this OR X-Order-Token, not both" },
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative to Bearer auth — use the accessToken returned when the order was created", "disabled": true }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Use this OR X-Order-Token, not both"
+              },
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}",
+                "description": "Guest alternative to Bearer auth — use the accessToken returned when the order was created",
+                "disabled": true
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/payment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "payment"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Customer or guest submits a MoMo/payment transaction ID for staff to verify. Sets paymentStatus → PENDING_VERIFICATION. Auth: Bearer token (any role, customers restricted to own orders) OR X-Order-Token header matching the order's accessToken. provider is optional."
           }
@@ -459,10 +929,32 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/cancel", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "cancel"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Customer changed their mind\"\n}"
@@ -474,10 +966,35 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests." },
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative — use the accessToken returned when the order was created", "disabled": true }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests."
+              },
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}",
+                "description": "Guest alternative — use the accessToken returned when the order was created",
+                "disabled": true
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "description": "Returns the full message thread for an order in chronological order. Also marks incoming messages as read. Auth: Bearer token (staff/customer) or X-Order-Token header (guest). CUSTOMER role is restricted to their own orders."
           }
         },
@@ -486,15 +1003,47 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}", "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests." },
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}", "description": "Guest alternative — use the accessToken returned when the order was created", "disabled": true }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Staff/Customer JWT. Use this OR X-Order-Token for guests."
+              },
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}",
+                "description": "Guest alternative — use the accessToken returned when the order was created",
+                "disabled": true
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content\": \"Can you make it less spicy please?\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Sends a message on an order. senderType is determined server-side: STAFF for staff/manager/admin JWT, CLIENT for customer JWT or guest X-Order-Token. Blocked on DELIVERED/CANCELLED orders."
           }
@@ -503,8 +1052,28 @@
           "name": "Delete Order",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/orders/:id", "host": ["{{baseUrl}}"], "path": ["orders", ":id"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "description": "Admin only"
           }
         },
@@ -512,14 +1081,33 @@
           "name": "Stats - Overview",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/orders/stats/overview",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "stats", "overview"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "stats",
+                "overview"
+              ],
               "query": [
-                { "key": "startDate", "value": "2026-01-01", "disabled": true },
-                { "key": "endDate", "value": "2026-12-31", "disabled": true }
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "disabled": true
+                }
               ]
             },
             "description": "Admin/Manager only"
@@ -529,13 +1117,28 @@
           "name": "Stats - Daily Sales",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/orders/stats/daily-sales?days=7",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "stats", "daily-sales"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "stats",
+                "daily-sales"
+              ],
               "query": [
-                { "key": "days", "value": "7", "description": "Number of days (default: 7)" }
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "Number of days (default: 7)"
+                }
               ]
             },
             "description": "Admin/Manager only"
@@ -552,10 +1155,19 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/tables",
-              "host": ["{{baseUrl}}"],
-              "path": ["tables"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables"
+              ],
               "query": [
-                { "key": "isActive", "value": "true", "disabled": true, "description": "Defaults to true — omit to get all active tables" }
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Defaults to true — omit to get all active tables"
+                }
               ]
             },
             "description": "Public endpoint. Returns active tables by default."
@@ -566,10 +1178,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/tables", "host": ["{{baseUrl}}"], "path": ["tables"] },
+            "url": {
+              "raw": "{{baseUrl}}/tables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"number\": \"T1\",\n  \"capacity\": 4,\n  \"location\": \"Main Hall\"\n}"
@@ -582,10 +1208,31 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/tables/:id", "host": ["{{baseUrl}}"], "path": ["tables", ":id"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/tables/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TABLE_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"number\": \"T1\",\n  \"capacity\": 6,\n  \"location\": \"VIP Room\",\n  \"isActive\": true\n}"
@@ -598,10 +1245,32 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/tables/:id/status", "host": ["{{baseUrl}}"], "path": ["tables", ":id", "status"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/tables/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TABLE_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"AVAILABLE\"\n}"
@@ -613,8 +1282,28 @@
           "name": "Delete Table",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/tables/:id", "host": ["{{baseUrl}}"], "path": ["tables", ":id"], "variable": [{ "key": "id", "value": "TABLE_ID_HERE" }] },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tables/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TABLE_ID_HERE"
+                }
+              ]
+            },
             "description": "Admin only. Fails if table has active orders."
           }
         }
@@ -630,12 +1319,27 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/menu?available=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["menu"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ],
               "query": [
-                { "key": "available", "value": "true" },
-                { "key": "categoryId", "value": "", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "available",
+                  "value": "true"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "Public. Filter by available=true to show only orderable items."
@@ -647,8 +1351,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/categories",
-              "host": ["{{baseUrl}}"],
-              "path": ["categories"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categories"
+              ]
             },
             "description": "Public."
           }
@@ -659,8 +1367,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/tables",
-              "host": ["{{baseUrl}}"],
-              "path": ["tables"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tables"
+              ]
             },
             "description": "Public. Returns active tables. Guest picks a table for DINE_IN orders."
           }
@@ -683,8 +1395,21 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy please\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2, \"excludedIngredients\": [\"onion\", \"chili\"] },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
@@ -710,8 +1435,21 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerName\": \"Jane Doe\",\n  \"customerPhone\": \"08198765432\",\n  \"orderType\": \"TAKEAWAY\",\n  \"notes\": \"Ready in 15 minutes\",\n  \"guestSessionToken\": \"{{guestSessionToken}}\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 1 }\n  ]\n}"
@@ -726,8 +1464,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "track", "{{orderAccessToken}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "track",
+                "{{orderAccessToken}}"
+              ]
             },
             "description": "Public — no auth required. Uses the accessToken auto-saved from step 4. Tracks one specific order."
           }
@@ -739,8 +1483,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/orders/session/{{guestSessionToken}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "session", "{{guestSessionToken}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "session",
+                "{{guestSessionToken}}"
+              ]
             },
             "description": "Public — no auth required. Returns ALL orders placed with this guestSessionToken. The mobile app generates this UUID once (on install or per session) and reuses it across orders. Multiple customers at the same table each have their own UUID."
           }
@@ -750,14 +1500,40 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/payment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "payment"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Guest submits payment transaction ID using X-Order-Token (the accessToken auto-saved from step 4). No Bearer auth needed. Sets paymentStatus → PENDING_VERIFICATION."
           }
@@ -767,9 +1543,28 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "description": "Poll this endpoint (e.g. every 8 seconds) to get the latest message thread. Use X-Order-Token from step 4. Also marks staff messages as read."
           }
         },
@@ -778,14 +1573,40 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Order-Token", "value": "{{orderAccessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Order-Token",
+                "value": "{{orderAccessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content\": \"Can I get extra sauce?\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Guest sends a message to the kitchen/staff. Uses X-Order-Token for auth. senderType will be CLIENT. Blocked on DELIVERED/CANCELLED orders."
           }
@@ -800,8 +1621,22 @@
           "name": "1. Register",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"John Doe\",\n  \"phone\": \"08123456789\"\n}"
@@ -828,8 +1663,22 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
@@ -842,12 +1691,27 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/menu?available=true",
-              "host": ["{{baseUrl}}"],
-              "path": ["menu"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ],
               "query": [
-                { "key": "available", "value": "true" },
-                { "key": "categoryId", "value": "", "disabled": true },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "available",
+                  "value": "true"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             },
             "description": "Public — no auth needed."
@@ -872,10 +1736,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders", "host": ["{{baseUrl}}"], "path": ["orders"] },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"customerName\": \"John Doe\",\n  \"customerPhone\": \"08123456789\",\n  \"orderType\": \"DINE_IN\",\n  \"tableId\": \"TABLE_ID_HERE\",\n  \"notes\": \"No spicy\",\n  \"items\": [\n    { \"menuItemId\": \"MENU_ITEM_ID_1\", \"quantity\": 2, \"excludedIngredients\": [\"onion\"] },\n    { \"menuItemId\": \"MENU_ITEM_ID_2\", \"quantity\": 1 }\n  ]\n}"
@@ -887,15 +1765,37 @@
           "name": "5. Get My Orders",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/orders/mine",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "mine"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "mine"
+              ],
               "query": [
-                { "key": "status", "value": "PENDING", "disabled": true },
-                { "key": "page", "value": "1", "disabled": true },
-                { "key": "limit", "value": "10", "disabled": true }
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
               ]
             },
             "description": "Returns only the authenticated customer's orders, paginated."
@@ -908,8 +1808,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/orders/track/{{orderAccessToken}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["orders", "track", "{{orderAccessToken}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "track",
+                "{{orderAccessToken}}"
+              ]
             },
             "description": "Public — no auth needed. Uses the accessToken from step 4."
           }
@@ -919,14 +1825,40 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/payment", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "payment"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/payment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "payment"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"transactionId\": \"1234567890\",\n  \"provider\": \"MTN_MOMO\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Authenticated customer submits a payment transaction ID for their own order. Sets paymentStatus → PENDING_VERIFICATION. Returns 403 if order belongs to another user."
           }
@@ -936,10 +1868,32 @@
           "request": {
             "method": "PATCH",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/cancel", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "cancel"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Changed my mind\"\n}"
@@ -952,9 +1906,28 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "description": "Poll this endpoint (e.g. every 8 seconds) to get the latest message thread. CUSTOMER is restricted to their own orders. Also marks staff messages as read."
           }
         },
@@ -963,16 +1936,218 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/orders/:id/messages", "host": ["{{baseUrl}}"], "path": ["orders", ":id", "messages"], "variable": [{ "key": "id", "value": "ORDER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/orders/:id/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                ":id",
+                "messages"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ORDER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content\": \"Can I get extra sauce please?\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "description": "Authenticated customer sends a message to the kitchen/staff. senderType will be CLIENT. Returns 403 if the order belongs to another user. Blocked on DELIVERED/CANCELLED orders."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Register Device (FCM)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/devices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "devices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{fcmToken}}\",\n  \"platform\": \"android\"\n}"
+            },
+            "description": "Registers this device FCM token for mobile push. Any authenticated role. Upserts by token, so re-posting after a token refresh or account switch reassigns it."
+          }
+        },
+        {
+          "name": "Unregister Device (FCM)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/devices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "devices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{fcmToken}}\"\n}"
+            },
+            "description": "Detaches the device token from the current account. Call on logout, before clearing the access token."
+          }
+        },
+        {
+          "name": "Get VAPID Public Key",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/vapid-key",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "vapid-key"
+              ]
+            },
+            "description": "Web Push public key for the browser dashboard. Auth required."
+          }
+        },
+        {
+          "name": "Subscribe Web Push",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/subscribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "subscribe"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscription\": {\n    \"endpoint\": \"https://fcm.googleapis.com/fcm/send/...\",\n    \"keys\": {\n      \"p256dh\": \"...\",\n      \"auth\": \"...\"\n    }\n  }\n}"
+            },
+            "description": "Browser Web Push subscription. Staff roles only (ADMIN/MANAGER/STAFF)."
+          }
+        },
+        {
+          "name": "Unsubscribe Web Push",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/subscribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "subscribe"
+              ]
+            },
+            "description": "Removes the caller Web Push subscription. Staff roles only."
+          }
+        },
+        {
+          "name": "SSE Stream (staff)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/stream?token={{accessToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "stream"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}"
+                }
+              ]
+            },
+            "description": "Server-Sent Events feed of order_created / order_updated for staff dashboards. Auth via query param because EventSource cannot set headers."
           }
         }
       ]
@@ -985,8 +2160,21 @@
           "name": "Get All Users",
           "request": {
             "method": "GET",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
           }
         },
         {
@@ -994,10 +2182,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Staff Member\",\n  \"email\": \"staff@dresto.com\",\n  \"phone\": \"08123456789\",\n  \"role\": \"STAFF\"\n}"
@@ -1010,10 +2212,31 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"08199999999\",\n  \"role\": \"MANAGER\",\n  \"isActive\": true\n}"
@@ -1024,8 +2247,28 @@
           "name": "Delete User",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
-            "url": { "raw": "{{baseUrl}}/users/:id", "host": ["{{baseUrl}}"], "path": ["users", ":id"], "variable": [{ "key": "id", "value": "USER_ID_HERE" }] }
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE"
+                }
+              ]
+            }
           }
         }
       ]

@@ -6,8 +6,19 @@ import { orderValidation, handleValidationErrors } from "../utils/validation";
 import { generateOrderNumber, calculateOrderTotal, isRestaurantOpenNow, RESTAURANT_SINGLETON_ID } from "../utils/helpers";
 import { sseManager } from "../lib/sseManager";
 import { sendPushToRoles } from "../lib/webPush";
+import { sendPushToUser, sendPushToRolesMobile } from "../lib/fcm";
 
 const STAFF_ROLES = ["ADMIN", "MANAGER", "STAFF"];
+
+// Customer-facing copy for each status. Staff see the raw status; customers
+// get something readable in their notification tray.
+const CUSTOMER_STATUS_COPY: Record<string, { title: string; body: string }> = {
+  CONFIRMED: { title: "Order confirmed", body: "We've received your order and it's queued for the kitchen." },
+  PREPARING: { title: "Your food is being prepared", body: "The kitchen has started on your order." },
+  READY: { title: "Your order is ready", body: "Your order is ready to be served." },
+  DELIVERED: { title: "Order delivered", body: "Enjoy your meal! Thanks for ordering with us." },
+  CANCELLED: { title: "Order cancelled", body: "Your order has been cancelled." },
+};
 
 /**
  * @swagger
@@ -842,6 +853,13 @@ router.post(
         `${notifData.customerName} placed order ${order.orderNumber}`,
         STAFF_ROLES
       ).catch(console.error);
+      // Same alert to staff running the mobile app
+      sendPushToRolesMobile(
+        STAFF_ROLES,
+        "New Order",
+        `${notifData.customerName} placed order ${order.orderNumber}`,
+        { type: "ORDER_CREATED", orderId: order.id, orderNumber: order.orderNumber }
+      );
     } catch (error) {
       console.error("Order creation error:", error);
       res.status(500).json({ message: "Failed to create order" });
@@ -920,6 +938,18 @@ router.patch("/:id/status", authenticateToken, requireRole(["ADMIN", "MANAGER", 
       `Order ${order.orderNumber} is now ${order.status}`,
       STAFF_ROLES
     ).catch(console.error);
+
+    // Notify the customer who placed it (logged-in orders only — guest orders
+    // have no userId and therefore no registered device).
+    const copy = CUSTOMER_STATUS_COPY[order.status];
+    if (order.userId && copy) {
+      sendPushToUser(order.userId, copy.title, copy.body, {
+        type: "ORDER_STATUS",
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+      });
+    }
   } catch (error) {
     console.error("Order status update error:", error);
     res.status(500).json({ message: "Failed to update order status" });
@@ -1182,6 +1212,22 @@ router.patch("/:id/cancel", optionalAuthenticateToken, (async (req, res) => {
       `Order ${updatedOrder.orderNumber} was cancelled`,
       STAFF_ROLES
     ).catch(console.error);
+
+    // Tell the customer only when someone else cancelled on their behalf —
+    // no point notifying them about the tap they just made.
+    if (updatedOrder.userId && updatedOrder.userId !== req.user?.id) {
+      sendPushToUser(
+        updatedOrder.userId,
+        "Order cancelled",
+        `Order ${updatedOrder.orderNumber} has been cancelled.`,
+        {
+          type: "ORDER_STATUS",
+          orderId: updatedOrder.id,
+          orderNumber: updatedOrder.orderNumber,
+          status: "CANCELLED",
+        }
+      );
+    }
   } catch (error) {
     console.error("Order cancellation error:", error);
     res.status(500).json({ message: "Failed to cancel order" });
