@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { prisma } from "../lib/prisma";
 import {
   registerValidation,
@@ -8,7 +9,16 @@ import {
   handleValidationErrors,
 } from "../utils/validation";
 import { authenticateToken } from "../middleware/auth";
+import { sendPasswordResetEmail } from "../lib/email";
 import { RequestHandler } from "express";
+
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+const hashToken = (token: string) =>
+  crypto.createHash("sha256").update(token).digest("hex");
+
+const getAppUrl = () =>
+  (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
 
 /**
  * @swagger
@@ -392,6 +402,147 @@ router.put("/change-password", authenticateToken, (async (req, res) => {
   } catch (error) {
     console.error("Password change error:", error);
     res.status(500).json({ message: "Failed to change password" });
+  }
+}) as RequestHandler);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Generic success — always returned, regardless of whether the email exists
+ */
+
+// Request password reset — always responds with a generic message to avoid
+// leaking which emails are registered.
+router.post("/forgot-password", (async (req, res) => {
+  const GENERIC_RESPONSE = {
+    message: "If an account with that email exists, a reset link has been sent.",
+  };
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.isActive) {
+      return res.json(GENERIC_RESPONSE);
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashToken(rawToken);
+
+    await prisma.$transaction([
+      // Invalidate any outstanding reset tokens for this user first
+      prisma.passwordResetToken.deleteMany({
+        where: { userId: user.id, usedAt: null },
+      }),
+      prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+        },
+      }),
+    ]);
+
+    const resetUrl = `${getAppUrl()}/reset-password?token=${rawToken}`;
+    await sendPasswordResetEmail(email, resetUrl);
+
+    res.json(GENERIC_RESPONSE);
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    // Still return the generic response — don't leak internal state via errors either
+    res.json(GENERIC_RESPONSE);
+  }
+}) as RequestHandler);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password using a token from the forgot-password email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid, expired, or already-used token
+ */
+
+// Reset password using the token emailed by /forgot-password
+router.post("/reset-password", (async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ message: "Reset token is required" });
+    }
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    const tokenHash = hashToken(token);
+    const resetToken = await prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (
+      !resetToken ||
+      resetToken.usedAt ||
+      resetToken.expiresAt < new Date()
+    ) {
+      return res.status(400).json({ message: "This reset link is invalid or has expired" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { password: hashedPassword },
+      }),
+      prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    res.json({ message: "Password reset successfully. You can now log in." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Failed to reset password" });
   }
 }) as RequestHandler);
 

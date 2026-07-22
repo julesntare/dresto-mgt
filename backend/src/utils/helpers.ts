@@ -6,10 +6,62 @@ export const generateOrderNumber = (): string => {
   return `ORD${timestamp}${random}`;
 };
 
+export interface OrderTotalItem {
+  price: number;
+  quantity: number;
+  // per-unit price deltas of the selected modifiers for this line (§4.2-4)
+  modifierDeltas?: number[];
+}
+
+export interface OrderMoneyRules {
+  serviceChargePct?: number | null;
+  vatEnabled?: boolean | null;
+  vatPct?: number | null;
+  deliveryFee?: number | null;
+}
+
+export interface OrderTotalBreakdown {
+  subtotal: number; // items + modifier deltas
+  serviceCharge: number;
+  vat: number;
+  deliveryFee: number;
+  total: number;
+}
+
+const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
+
+// Full order total per §4.2-4: line subtotal (item price + modifier deltas) × qty,
+// then service charge, then VAT on (subtotal + service charge), then delivery fee
+// (delivery orders only). Rules come from the Restaurant config row.
 export const calculateOrderTotal = (
-  items: Array<{ price: number; quantity: number }>
-): number => {
-  return items.reduce((total, item) => total + item.price * item.quantity, 0);
+  items: OrderTotalItem[],
+  opts: { rules?: OrderMoneyRules; orderType?: string } = {}
+): OrderTotalBreakdown => {
+  const { rules = {}, orderType } = opts;
+
+  const subtotal = items.reduce((sum, item) => {
+    const modifiers = (item.modifierDeltas ?? []).reduce((a, d) => a + d, 0);
+    return sum + (item.price + modifiers) * item.quantity;
+  }, 0);
+
+  const serviceCharge = rules.serviceChargePct
+    ? subtotal * (rules.serviceChargePct / 100)
+    : 0;
+
+  const vat = rules.vatEnabled && rules.vatPct
+    ? (subtotal + serviceCharge) * (rules.vatPct / 100)
+    : 0;
+
+  const deliveryFee =
+    orderType === "DELIVERY" && rules.deliveryFee ? rules.deliveryFee : 0;
+
+  return {
+    subtotal: round2(subtotal),
+    serviceCharge: round2(serviceCharge),
+    vat: round2(vat),
+    deliveryFee: round2(deliveryFee),
+    total: round2(subtotal + serviceCharge + vat + deliveryFee),
+  };
 };
 
 export const formatCurrency = (amount: number): string => {

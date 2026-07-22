@@ -19,8 +19,21 @@ model User {
 
     // Relations
     orders Order[]
+    passwordResetTokens PasswordResetToken[]
 
     @@map("users")
+}
+
+model PasswordResetToken {
+    id        String    @id @default(cuid())
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    tokenHash String    @unique
+    expiresAt DateTime
+    usedAt    DateTime?
+    createdAt DateTime  @default(now())
+
+    @@map("password_reset_tokens")
 }
 
 model Category {
@@ -50,8 +63,9 @@ model MenuItem {
     updatedAt   DateTime @updatedAt
 
     // Relations
-    category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-    orderItems OrderItem[]
+    category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    orderItems     OrderItem[]
+    modifierGroups ModifierGroup[]
 
     @@map("menu_items")
 }
@@ -89,14 +103,28 @@ model Order {
     paymentStatus     PaymentStatus @default(UNPAID)
     paymentProvider   String?
     paidAt            DateTime?
+
+    // Delivery (orderType = DELIVERY) — §4.2-2
+    deliveryAddress   String?
+    deliveryLat       Float?
+    deliveryLng       Float?
+    deliveryFee       Decimal?  @db.Decimal(10, 2)
+    deliveryZone      String?
+    riderId           String?
+
+    // Fulfillment leg, separate from prep status — §4.2-3
+    // Kitchen board reads `status`; delivery/service board reads `fulfillmentStatus`.
+    fulfillmentStatus FulfillmentStatus @default(NONE)
+
     createdAt     DateTime    @default(now())
     updatedAt     DateTime    @updatedAt
 
     // Relations
-    user       User?          @relation(fields: [userId], references: [id])
-    table      Table?         @relation(fields: [tableId], references: [id])
-    orderItems OrderItem[]
-    messages   OrderMessage[]
+    user          User?          @relation(fields: [userId], references: [id])
+    table         Table?         @relation(fields: [tableId], references: [id])
+    orderItems    OrderItem[]
+    messages      OrderMessage[]
+    paymentEvents PaymentEvent[]
 
     @@map("orders")
 }
@@ -124,10 +152,66 @@ model OrderItem {
     createdAt           DateTime @default(now())
 
     // Relations
-    order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-    menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+    order             Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    menuItem          MenuItem           @relation(fields: [menuItemId], references: [id])
+    selectedModifiers SelectedModifier[]
 
     @@map("order_items")
+}
+
+// Paid modifiers / add-ons — §4.2-4
+model ModifierGroup {
+    id         String     @id @default(cuid())
+    menuItemId String
+    menuItem   MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+    name       String // "Size", "Extras"
+    minSelect  Int        @default(0)
+    maxSelect  Int        @default(1)
+    options    Modifier[]
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+
+    @@map("modifier_groups")
+}
+
+model Modifier {
+    id          String        @id @default(cuid())
+    groupId     String
+    group       ModifierGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    name        String // "Large", "Double shot"
+    priceDelta  Decimal       @default(0) @db.Decimal(10, 2)
+    isAvailable Boolean       @default(true)
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+
+    @@map("modifiers")
+}
+
+// Snapshot of selected modifiers at order time (same reasoning as OrderItem.price snapshot)
+model SelectedModifier {
+    id          String    @id @default(cuid())
+    orderItemId String
+    orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+    name        String
+    priceDelta  Decimal   @db.Decimal(10, 2)
+    createdAt   DateTime  @default(now())
+
+    @@map("selected_modifiers")
+}
+
+// Payment provider event log — idempotency for async webhooks (§7; provider wiring on hold)
+model PaymentEvent {
+    id          String   @id @default(cuid())
+    orderId     String
+    order       Order    @relation(fields: [orderId], references: [id])
+    provider    String // "paypack" | "irembopay"
+    providerRef String   @unique // idempotency key from provider
+    status      String // provider-reported status
+    amount      Decimal  @db.Decimal(10, 2)
+    rawPayload  Json?
+    createdAt   DateTime @default(now())
+
+    @@map("payment_events")
 }
 
 model Restaurant {
@@ -201,4 +285,12 @@ enum PaymentStatus {
     UNPAID
     PENDING_VERIFICATION
     PAID
+}
+
+enum FulfillmentStatus {
+    NONE
+    AWAITING_PICKUP
+    OUT_FOR_DELIVERY
+    DELIVERED
+    SERVED
 }
