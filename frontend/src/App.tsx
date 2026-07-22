@@ -4,6 +4,8 @@ import { AuthProvider } from './lib/auth-context'
 import { NotificationProvider } from './lib/notification-context'
 import LoginLayout from './login/layout'
 import LoginPage from './login/page'
+import ForgotPasswordPage from './forgot-password/page'
+import ResetPasswordPage from './reset-password/page'
 import DashboardLayout from './dashboard/layout'
 import DashboardPage from './dashboard/page'
 import CategoriesPage from './categories/page'
@@ -28,6 +30,22 @@ export default function App() {
               element={
                 <LoginLayout>
                   <LoginPage />
+                </LoginLayout>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <LoginLayout>
+                  <ForgotPasswordPage />
+                </LoginLayout>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <LoginLayout>
+                  <ResetPasswordPage />
                 </LoginLayout>
               }
             />

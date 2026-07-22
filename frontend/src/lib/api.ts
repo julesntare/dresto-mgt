@@ -217,6 +217,19 @@ export const authApi = {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
   },
+
+  forgotPassword: async (email: string) => {
+    const response = await api.post<{ message: string }>("/auth/forgot-password", { email });
+    return response.data;
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    const response = await api.post<{ message: string }>("/auth/reset-password", {
+      token,
+      newPassword,
+    });
+    return response.data;
+  },
 };
 
 // Menu API functions
