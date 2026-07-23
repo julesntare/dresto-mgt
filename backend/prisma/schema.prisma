@@ -96,10 +96,48 @@ model Table {
     createdAt DateTime    @default(now())
     updatedAt DateTime    @updatedAt
 
+    // Floor-map placement (normalised 0..1). Null until placed on the plan.
+    floorId String?
+    floor   Floor?  @relation(fields: [floorId], references: [id], onDelete: SetNull)
+    posX    Float?
+    posY    Float?
+
     // Relations
     orders Order[]
 
+    @@index([floorId])
     @@map("tables")
+}
+
+/// One level of the venue (Ground, Mezzanine, Rooftop, …). `order` is the
+/// display order, bottom → top of the building.
+model Floor {
+    id        String   @id @default(cuid())
+    name      String
+    order     Int      @default(0)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    tables    Table[]
+    landmarks Landmark[]
+
+    @@map("floors")
+}
+
+/// A non-table point of interest on a floor (kitchen, restroom, entrance,
+/// stairs, elevator, …). `type` mirrors the app's LandmarkType wire name;
+/// `label` is set only for custom ("other") landmarks. Position is 0..1.
+model Landmark {
+    id      String  @id @default(cuid())
+    floorId String
+    floor   Floor   @relation(fields: [floorId], references: [id], onDelete: Cascade)
+    type    String
+    label   String?
+    posX    Float
+    posY    Float
+
+    @@index([floorId])
+    @@map("landmarks")
 }
 
 model Order {

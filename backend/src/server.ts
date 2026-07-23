@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orders";
 import categoryRoutes from "./routes/categories";
 import userRoutes from "./routes/users";
 import tableRoutes from "./routes/tables";
+import floorPlanRoutes from "./routes/floorPlan";
 import notificationRoutes from "./routes/notifications";
 import restaurantRoutes from "./routes/restaurant";
 import { prisma } from "./lib/prisma";
@@ -78,6 +79,7 @@ app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tables", tableRoutes);
+app.use("/api/v1/floor-plan", floorPlanRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/restaurant", restaurantRoutes);
 // 404 handler
