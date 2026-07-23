@@ -98,7 +98,7 @@ router.put("/:id", (async (req, res) => {
       return res.status(400).json({ message: "You cannot deactivate your own account" });
     }
 
-    const validRoles = ["ADMIN", "MANAGER", "STAFF"];
+    const validRoles = ["ADMIN", "MANAGER", "STAFF", "CUSTOMER"];
     if (role && !validRoles.includes(role)) {
       return res.status(400).json({ message: "Invalid role" });
     }
