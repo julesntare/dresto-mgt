@@ -13,6 +13,7 @@ import {
   Moon,
   Grid3x3,
   ChefHat,
+  Map as MapIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "../../lib/use-theme";
@@ -36,6 +37,12 @@ const navigation = [
     roles: ["ADMIN", "MANAGER"],
   },
   { name: "Tables", href: "/dashboard/tables", icon: Grid3x3, roles: ["ADMIN"] },
+  {
+    name: "Floor Plan",
+    href: "/dashboard/floor-plan",
+    icon: MapIcon,
+    roles: ["ADMIN", "MANAGER"],
+  },
   { name: "Users", href: "/dashboard/users", icon: Users, roles: ["ADMIN"] },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

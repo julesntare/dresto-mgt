@@ -14,6 +14,7 @@ import OrdersPage from './orders/page'
 import AnalyticsPage from './analytics/page'
 import UsersPage from './users/page'
 import TablesPage from './tables/page'
+import FloorPlanPage from './floor-plan/page'
 import SettingsPage from './settings/page'
 import KitchenPage from './kitchen/page'
 
@@ -94,6 +95,14 @@ export default function App() {
               element={
                 <DashboardLayout>
                   <TablesPage />
+                </DashboardLayout>
+              }
+            />
+            <Route
+              path="/dashboard/floor-plan"
+              element={
+                <DashboardLayout>
+                  <FloorPlanPage />
                 </DashboardLayout>
               }
             />

@@ -627,3 +627,43 @@ export const tablesApi = {
     return response.data;
   },
 };
+
+// Floor plan API (multi-floor table map)
+export interface FloorPlanLandmark {
+  id?: string;
+  type: string;
+  label?: string | null;
+  posX: number;
+  posY: number;
+}
+
+export interface FloorPlanPlacement {
+  tableId: string;
+  posX: number;
+  posY: number;
+}
+
+export interface FloorPlanFloor {
+  id?: string;
+  name: string;
+  order?: number;
+  landmarks: FloorPlanLandmark[];
+  tables: FloorPlanPlacement[];
+}
+
+export const floorPlanApi = {
+  // Public: floors + landmarks + table placements (positions only; status is
+  // on /tables).
+  get: async () => {
+    const response = await api.get<{ floors: FloorPlanFloor[] }>("/floor-plan");
+    return response.data;
+  },
+
+  // Admin/Manager: full replace of the plan.
+  save: async (floors: FloorPlanFloor[]) => {
+    const response = await api.put<{ message: string }>("/floor-plan", {
+      floors,
+    });
+    return response.data;
+  },
+};
